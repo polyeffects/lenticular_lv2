@@ -1,19 +1,8 @@
 #include "rack.hpp"
 
-
 using namespace rack;
 
-
-extern Plugin *plugin;
-
-////////////////////
-// module widgets
-////////////////////
-
-// struct CloudsWidget : ModuleWidget {
-// 	CloudsWidget();
-//   Menu *createContextMenu() override;
-// };
-
+// Declare the Plugin, defined in Template.cpp
+extern Plugin *pluginInstance;
 
 extern Model *modelClouds;
