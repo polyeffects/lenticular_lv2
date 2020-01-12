@@ -161,7 +161,7 @@ class GranularProcessor {
   }
 
   inline float sample_rate() const {
-    return 32000.0f / \
+    return 48000.0f / \
         (low_fidelity_ ? kDownsamplingFactor : 1);
   }
      

@@ -108,11 +108,11 @@ void Init() {
 
   settings.Init();
   cv_scaler.Init(settings.mutable_calibration_data());
-  meter.Init(32000);
+  meter.Init(48000);
   ui.Init(&settings, &cv_scaler, &processor, &meter);
 
   bool master = !version.revised();
-  if (!codec.Init(master, 32000)) {
+  if (!codec.Init(master, 48000)) {
     ui.Panic();
   }
   if (!codec.Start(32, &FillBuffer)) {

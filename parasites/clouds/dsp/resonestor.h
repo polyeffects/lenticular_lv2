@@ -101,7 +101,7 @@ class Resonestor {
     burst_lp_.Init();
     rand_lp_.Init();
     rand_hp_.Init();
-    rand_hp_.set_f<FREQUENCY_FAST>(1.0f / 32000.0f);
+    rand_hp_.set_f<FREQUENCY_FAST>(1.0f / 48000.0f);
     for (int v=0; v<2; v++)
       for (int p=0; p<4; p++) {
         lp_[p][v].Init();
@@ -152,7 +152,7 @@ class Resonestor {
     }
 
     /* set comb filters pitch */
-    comb_period_[0][voice_] = 32000.0f / BASE_PITCH / SemitonesToRatio(pitch_[voice_]);
+    comb_period_[0][voice_] = 48000.0f / BASE_PITCH / SemitonesToRatio(pitch_[voice_]);
     CONSTRAIN(comb_period_[0][voice_], 0, MAX_COMB);
     for (int p=1; p<4; p++) {
       float pitch = InterpolatePlateau(chords[p-1], chord_[voice_], 16);
@@ -167,7 +167,7 @@ class Resonestor {
       float lp_freq = (2.0f * freq + 1.0f) * damp_[voice_];
       CONSTRAIN(lp_freq, 0.0f, 1.0f);
       lp_[p][voice_].set_f_q<FREQUENCY_FAST>(lp_freq, 0.4f);
-      comb_feedback_[p][voice_] = powf(feedback_[voice_], comb_period_[p][voice_] / 32000.0f);
+      comb_feedback_[p][voice_] = powf(feedback_[voice_], comb_period_[p][voice_] / 48000.0f);
     }
 
     /* initiate burst if trigger */
@@ -233,7 +233,7 @@ class Resonestor {
         acc = lp_[part][voice].Process<FILTER_MODE_LOW_PASS>(acc);      \
         acc = bp_[part][voice].Process<FILTER_MODE_BAND_PASS_NORMALIZED>(acc); \
         c.Load(acc);                                                    \
-        c.Hp(hp_[part][voice], 10.0f / 32000.0f);                       \
+        c.Hp(hp_[part][voice], 10.0f / 48000.0f);                       \
         c.Write(acc, 0.5f);                                             \
         c.SoftLimit();                                                  \
         c.Write(acc, 2.0f);                                             \

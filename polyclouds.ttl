@@ -1,0 +1,158 @@
+@prefix atom:  <http://lv2plug.in/ns/ext/atom#> .
+@prefix doap:  <http://usefulinc.com/ns/doap#> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix urid:  <http://lv2plug.in/ns/ext/urid#> .
+@prefix pprops:<http://lv2plug.in/ns/ext/port-props#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix time:  <http://lv2plug.in/ns/ext/time#> .
+
+<http://polyeffects.com/lv2/polyclouds>
+	a lv2:Plugin ;
+	doap:name "Poly Clouds" ;
+	doap:license <http://opensource.org/licenses/gpl> ;
+	lv2:requiredFeature urid:map ;
+	lv2:optionalFeature lv2:hardRTCapable ;
+	lv2:port [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 0 ;
+		lv2:symbol "freeze" ;
+		lv2:name "Freeze" ;
+		lv2:default 0.5 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 1 ;
+		lv2:symbol "trig" ;
+		lv2:name "Trigger";
+		lv2:default 0.5 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 2 ;
+		lv2:symbol "position" ;
+		lv2:name "Position";
+		lv2:default 0.5 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 3 ;
+		lv2:symbol "size" ;
+		lv2:name "Size" ;
+		lv2:default 0.5 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 4 ;
+		lv2:symbol "pitch" ;
+		lv2:name "Pitch" ;
+		lv2:default 0.0 ;
+		lv2:minimum -2.0 ;
+		lv2:maximum 2.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 5 ;
+		lv2:symbol "blend" ;
+		lv2:name "Blend" ;
+		lv2:default 0.5 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 6 ;
+		lv2:symbol "spread" ;
+		lv2:name "Spread" ;
+		lv2:default 0.5 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 7 ;
+		lv2:symbol "Feedback" ;
+		lv2:name "feedback" ;
+		lv2:default 0.5 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 8 ;
+		lv2:symbol "reverb" ;
+		lv2:name "Reverb" ;
+		lv2:default 0.5 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 9 ;
+		lv2:symbol "density" ;
+		lv2:name "Density" ;
+		lv2:default 0.5 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 10 ;
+		lv2:symbol "texture" ;
+		lv2:name "Texture" ;
+		lv2:default 0.5 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:CVPort ;
+		lv2:index 11 ;
+		lv2:symbol "reverse" ;
+		lv2:name "Reverse" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 12 ;
+		lv2:symbol "mode" ;
+		lv2:name "Mode" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 5.0 ;
+	] , [
+		a lv2:InputPort ,
+			lv2:AudioPort ;
+		lv2:index 13 ;
+		lv2:symbol "l_in" ;
+		lv2:name "L in"
+	] , [
+		a lv2:InputPort ,
+			lv2:AudioPort ;
+		lv2:index 14 ;
+		lv2:symbol "r_in" ;
+		lv2:name "R in"
+	] , [
+		a lv2:OutputPort ,
+			lv2:AudioPort ;
+		lv2:index 15 ;
+		lv2:symbol "l_out" ;
+		lv2:name "L Out" ;
+	] , [
+		a lv2:OutputPort ,
+			lv2:AudioPort ;
+		lv2:index 16 ;
+		lv2:symbol "r_out" ;
+		lv2:name "R Out" ;
+	] .
