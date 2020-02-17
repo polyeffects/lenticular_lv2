@@ -22,7 +22,7 @@
 #include <string.h>
 #include "clouds/dsp/granular_processor.h"
 
-#define clamp(x, upper, lower) (fmin(upper, fmax(x, lower)))
+#define clamp(x, lower, upper) (fmax(lower, fmin(x, upper)))
 
 #define CLOUDS_URI "http://polyeffects.com/lv2/polyclouds"
 
@@ -97,7 +97,7 @@ instantiate(const LV2_Descriptor*     descriptor,
             const LV2_Feature* const* features)
 {
 	Clouds* amp = (Clouds*)calloc(1, sizeof(Clouds));
-	const int memLen = 118784*1024;
+	const int memLen = 118784*256;
 	const int ccmLen = 65536 - 128;
 	amp->block_mem = new uint8_t[memLen]();
 	amp->block_ccm = new uint8_t[ccmLen]();
@@ -224,14 +224,13 @@ run(LV2_Handle instance, uint32_t n_samples)
 	/* uint32_t block_size = 32; */
 	bool triggered = false;
 	uint32_t block_size = 32;
-	clouds::ShortFrame input[block_size] = {};
-	clouds::ShortFrame output[block_size];
 	for (uint32_t pos = 0; pos < n_samples; pos=pos+block_size) {
 	
-		if (trig[pos] >= 1.0) {
+		if (trig[pos] >= 0.8) {
 			triggered = true;
 		}
 
+		clouds::ShortFrame input[block_size] = {};
 		for (uint32_t i = 0; i < block_size; i++) {
 			input[i].l = clamp(in_l[pos+i] * 32767.0f, -32768.0f, 32767.0f);
 			input[i].r = clamp(in_r[pos+i] * 32767.0f, -32768.0f, 32767.0f);
@@ -260,6 +259,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		p->reverb =  clamp(reverb[j], 0.0f, 1.0f);
 		p->granular.reverse = (reverse[j] >= 1.0);
 
+		clouds::ShortFrame output[block_size];
 		processor->Process(input, output, 32);
 
 		for (uint32_t i = 0; i < block_size; i++) {
