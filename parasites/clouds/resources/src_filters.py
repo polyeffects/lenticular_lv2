@@ -32,7 +32,7 @@ import numpy
 import pylab
 import scipy.signal
 
-SAMPLE_RATE = 32000
+SAMPLE_RATE = 48000
 CRITICAL_FREQUENCY = 12000.0
 IR_LENGTH = 8192
 

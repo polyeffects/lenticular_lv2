@@ -60,7 +60,7 @@ def modified_chamberlin(f, fq, x, mode='bp'):
 
 
 
-SAMPLE_RATE = 96000
+SAMPLE_RATE = 48000
 IR_SIZE = 2048
 
 

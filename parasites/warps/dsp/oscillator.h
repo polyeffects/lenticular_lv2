@@ -38,7 +38,7 @@
 
 namespace warps {
 
-const float kInternalOscillatorSampleRate = 96000.0f;
+const float kInternalOscillatorSampleRate = 48000.0f;
 
 class Oscillator {
  public:

@@ -58,7 +58,7 @@ def make_quadrature(name, x, angle_1=0, angle_2=0.5):
 
 
 
-SAMPLE_RATE = 96000
+SAMPLE_RATE = 48000
 WAVETABLE_SIZE = 1024
 
 t = numpy.arange(WAVETABLE_SIZE + 1) / float(WAVETABLE_SIZE) * 2 * numpy.pi

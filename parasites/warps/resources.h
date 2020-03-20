@@ -48,26 +48,26 @@ extern const float* lookup_table_table[];
 
 extern const float* wav_table[];
 
-extern const float fb__87_8000[];
-extern const float fb_110_8000[];
-extern const float fb_139_8000[];
-extern const float fb_175_8000[];
-extern const float fb_220_8000[];
-extern const float fb_277_8000[];
-extern const float fb_349_8000[];
-extern const float fb_440_8000[];
-extern const float fb_554_8000[];
-extern const float fb_698_8000[];
-extern const float fb_880_8000[];
-extern const float fb_1109_8000[];
-extern const float fb_1397_8000[];
-extern const float fb_1760_32000[];
-extern const float fb_2217_32000[];
-extern const float fb_2794_32000[];
-extern const float fb_3520_32000[];
-extern const float fb_4435_32000[];
-extern const float fb_5588_32000[];
-extern const float fb_7040_96000[];
+extern const float fb__87_4000[];
+extern const float fb_110_4000[];
+extern const float fb_139_4000[];
+extern const float fb_175_4000[];
+extern const float fb_220_4000[];
+extern const float fb_277_4000[];
+extern const float fb_349_4000[];
+extern const float fb_440_4000[];
+extern const float fb_554_4000[];
+extern const float fb_698_4000[];
+extern const float fb_880_4000[];
+extern const float fb_1109_4000[];
+extern const float fb_1397_4000[];
+extern const float fb_1760_16000[];
+extern const float fb_2217_16000[];
+extern const float fb_2794_16000[];
+extern const float fb_3520_16000[];
+extern const float fb_4435_16000[];
+extern const float fb_5588_16000[];
+extern const float fb_7040_48000[];
 extern const float lut_sin[];
 extern const float lut_arcsin[];
 extern const float lut_xfade_in[];
@@ -83,46 +83,46 @@ extern const float wav_harmonics_i[];
 extern const float wav_harmonics_q[];
 extern const float wav_buzzy_i[];
 extern const float wav_buzzy_q[];
-#define FB__87_8000 0
-#define FB__87_8000_SIZE 7
-#define FB_110_8000 1
-#define FB_110_8000_SIZE 7
-#define FB_139_8000 2
-#define FB_139_8000_SIZE 7
-#define FB_175_8000 3
-#define FB_175_8000_SIZE 7
-#define FB_220_8000 4
-#define FB_220_8000_SIZE 7
-#define FB_277_8000 5
-#define FB_277_8000_SIZE 7
-#define FB_349_8000 6
-#define FB_349_8000_SIZE 7
-#define FB_440_8000 7
-#define FB_440_8000_SIZE 7
-#define FB_554_8000 8
-#define FB_554_8000_SIZE 7
-#define FB_698_8000 9
-#define FB_698_8000_SIZE 7
-#define FB_880_8000 10
-#define FB_880_8000_SIZE 7
-#define FB_1109_8000 11
-#define FB_1109_8000_SIZE 7
-#define FB_1397_8000 12
-#define FB_1397_8000_SIZE 7
-#define FB_1760_32000 13
-#define FB_1760_32000_SIZE 7
-#define FB_2217_32000 14
-#define FB_2217_32000_SIZE 7
-#define FB_2794_32000 15
-#define FB_2794_32000_SIZE 7
-#define FB_3520_32000 16
-#define FB_3520_32000_SIZE 7
-#define FB_4435_32000 17
-#define FB_4435_32000_SIZE 7
-#define FB_5588_32000 18
-#define FB_5588_32000_SIZE 7
-#define FB_7040_96000 19
-#define FB_7040_96000_SIZE 7
+#define FB__87_4000 0
+#define FB__87_4000_SIZE 7
+#define FB_110_4000 1
+#define FB_110_4000_SIZE 7
+#define FB_139_4000 2
+#define FB_139_4000_SIZE 7
+#define FB_175_4000 3
+#define FB_175_4000_SIZE 7
+#define FB_220_4000 4
+#define FB_220_4000_SIZE 7
+#define FB_277_4000 5
+#define FB_277_4000_SIZE 7
+#define FB_349_4000 6
+#define FB_349_4000_SIZE 7
+#define FB_440_4000 7
+#define FB_440_4000_SIZE 7
+#define FB_554_4000 8
+#define FB_554_4000_SIZE 7
+#define FB_698_4000 9
+#define FB_698_4000_SIZE 7
+#define FB_880_4000 10
+#define FB_880_4000_SIZE 7
+#define FB_1109_4000 11
+#define FB_1109_4000_SIZE 7
+#define FB_1397_4000 12
+#define FB_1397_4000_SIZE 7
+#define FB_1760_16000 13
+#define FB_1760_16000_SIZE 7
+#define FB_2217_16000 14
+#define FB_2217_16000_SIZE 7
+#define FB_2794_16000 15
+#define FB_2794_16000_SIZE 7
+#define FB_3520_16000 16
+#define FB_3520_16000_SIZE 7
+#define FB_4435_16000 17
+#define FB_4435_16000_SIZE 7
+#define FB_5588_16000 18
+#define FB_5588_16000_SIZE 7
+#define FB_7040_48000 19
+#define FB_7040_48000_SIZE 7
 #define LUT_SIN 0
 #define LUT_SIN_SIZE 1281
 #define LUT_ARCSIN 1

@@ -36,13 +36,13 @@ BOOTLOADER        = warps_bootloader
 UPLOAD_COMMAND  = upload_combo_jtag_erase_first
 
 # Packages to build
-TARGET         = warps
-PACKAGES       = warps \
-		warps/drivers \
-		warps/dsp \
-		stmlib/dsp \
-		stmlib/utils \
-		stmlib/system
+#TARGET         = warps
+#PACKAGES       = warps \
+#		warps/drivers \
+#		warps/dsp \
+#		stmlib/dsp \
+#		stmlib/utils \
+#		stmlib/system
 RESOURCES      = warps/resources
 
 TOOLCHAIN_PATH ?= /usr/local/arm-4.8.3/

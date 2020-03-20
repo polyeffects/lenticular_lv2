@@ -840,7 +840,7 @@ void Modulator::ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t siz
     ONE_POLE(angle, an, 0.001f);
 
     // compute binaural delay
-    float binaural_delay = angle * (96000.0f * 0.0015f); // -1.5ms..1.5ms
+    float binaural_delay = angle * (48000.0f * 0.0015f); // -1.5ms..1.5ms
     float delay_l = distance * room_size + (angle > 0 ? binaural_delay : 0);
     float delay_r = distance * room_size + (angle < 0 ? -binaural_delay : 0);
 
@@ -878,7 +878,7 @@ void Modulator::ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t siz
 
     x += x_increment;
     y += y_increment;
-    lfo_phase += lfo_freq / 96000.0f;
+    lfo_phase += lfo_freq / 48000.0f;
     if (lfo_phase > 1.0f) lfo_phase--;
     input++;
     output++;
