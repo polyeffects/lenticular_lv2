@@ -1,12 +1,55 @@
 @prefix lv2:    <http://lv2plug.in/ns/lv2core#> .
 @prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix warps: <http://polyeffects.com/lv2/polywarps#> .
 
 <http://polyeffects.com/lv2/polyclouds> 
 	a lv2:Plugin ;
 	lv2:binary <polyclouds.so> ;
-	rdfs:label "poly clouds granular" ;
+	# rdfs:label "poly clouds granular" ;
 	rdfs:seeAlso <polyclouds.ttl> .
-# Temporarily include description of lv2:MIDIPlugin for backwards compatibility
-#lv2:MIDIPlugin
-#	a rdfs:Class ;
-#	rdfs:subClassOf lv2:Plugin ;
+
+warps:doppler
+	a lv2:Plugin ;
+	lv2:binary <polywarps.so> ;
+	rdfs:seeAlso <polywarps.ttl> .
+
+warps:fold
+	a lv2:Plugin ;
+	lv2:binary <polywarps.so> ;
+	rdfs:seeAlso <polywarps.ttl> .
+
+warps:chebyschev
+	a lv2:Plugin ;
+	lv2:binary <polywarps.so> ;
+	rdfs:seeAlso <polywarps.ttl> .
+
+warps:frequency_shifter
+	a lv2:Plugin ;
+	lv2:binary <polywarps.so> ;
+	rdfs:seeAlso <polywarps.ttl> .
+
+warps:bitcrusher
+	a lv2:Plugin ;
+	lv2:binary <polywarps.so> ;
+	rdfs:seeAlso <polywarps.ttl> .
+
+warps:comparator
+	a lv2:Plugin ;
+	lv2:binary <polywarps.so> ;
+	rdfs:seeAlso <polywarps.ttl> .
+
+warps:vocoder
+	a lv2:Plugin ;
+	lv2:binary <polywarps.so> ;
+	rdfs:seeAlso <polywarps.ttl> .
+
+warps:delay
+	a lv2:Plugin ;
+	lv2:binary <polywarps.so> ;
+	rdfs:seeAlso <polywarps.ttl> .
+
+warps:meta
+	a lv2:Plugin ;
+	lv2:binary <polywarps.so> ;
+	rdfs:seeAlso <polywarps.ttl> .
+
