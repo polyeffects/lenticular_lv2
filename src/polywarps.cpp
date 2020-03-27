@@ -154,6 +154,8 @@ connect_port(LV2_Handle instance,
         case AUX_OUTPUT:
             amp->aux_output = (float*)data;
             break;
+		default:
+			break;
 	}
 }
 
@@ -199,8 +201,12 @@ run(LV2_Handle instance, uint32_t n_samples)
 	warps::Modulator *modulator = &(amp->modulator);
 
 	uint32_t block_size = 32;
-	for (uint32_t pos = 0; pos < n_samples; pos=pos+block_size) {
+	if (n_samples < block_size){
+		block_size = n_samples;	
+	}
 
+	uint32_t pos = 0;
+	while (pos < n_samples){
 		warps::ShortFrame input[block_size] = {};
 		for (uint32_t i = 0; i < block_size; i++) {
 			input[i].l = clamp(carrier_input[pos+i] * 32767.0f, -32768.0f, 32767.0f);
@@ -231,6 +237,11 @@ run(LV2_Handle instance, uint32_t n_samples)
 		for (uint32_t i = 0; i < block_size; i++) {
 			modulator_output[pos+i] = output[i].l / 32768.0;
 			aux_output[pos+i] = output[i].r / 32768.0;
+		}
+
+		pos = pos + block_size;
+		if (pos+block_size > n_samples){
+			block_size = n_samples - pos;
 		}
 	}
 

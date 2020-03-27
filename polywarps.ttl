@@ -11,7 +11,7 @@
 
 warps:doppler
 	a lv2:Plugin ;
-	doap:name "Poly Warps Binaural Doppler Panner" ;
+	doap:name "Poly Twist Binaural Doppler Panner" ;
 	doap:license <http://opensource.org/licenses/gpl> ;
 	lv2:requiredFeature urid:map ;
 	lv2:optionalFeature lv2:hardRTCapable ;
@@ -124,7 +124,7 @@ warps:doppler
 
 warps:fold
 	a lv2:Plugin ;
-	doap:name "Poly Warps Wavefolder" ;
+	doap:name "Poly Twist Wavefolder" ;
 	doap:license <http://opensource.org/licenses/gpl> ;
 	lv2:requiredFeature urid:map ;
 	lv2:optionalFeature lv2:hardRTCapable ;
@@ -237,7 +237,7 @@ warps:fold
 
 warps:chebyschev
 	a lv2:Plugin ;
-	doap:name "Poly Warps Chebyschev" ;
+	doap:name "Poly Twist Chebyschev" ;
 	doap:license <http://opensource.org/licenses/gpl> ;
 	lv2:requiredFeature urid:map ;
 	lv2:optionalFeature lv2:hardRTCapable ;
@@ -350,7 +350,7 @@ warps:chebyschev
 
 warps:frequency_shifter
 	a lv2:Plugin ;
-	doap:name "Poly Warps frequency shifter" ;
+	doap:name "Poly Twist frequency shifter" ;
 	doap:license <http://opensource.org/licenses/gpl> ;
 	lv2:requiredFeature urid:map ;
 	lv2:optionalFeature lv2:hardRTCapable ;
@@ -463,7 +463,7 @@ warps:frequency_shifter
 
 warps:bitcrusher
 	a lv2:Plugin ;
-	doap:name "Poly Warps Bitmangler" ;
+	doap:name "Poly Twist Bitmangler" ;
 	doap:license <http://opensource.org/licenses/gpl> ;
 	lv2:requiredFeature urid:map ;
 	lv2:optionalFeature lv2:hardRTCapable ;
@@ -576,7 +576,7 @@ warps:bitcrusher
 
 warps:comparator
 	a lv2:Plugin ;
-	doap:name "Poly Warps Comparator" ;
+	doap:name "Poly Twist Comparator" ;
 	doap:license <http://opensource.org/licenses/gpl> ;
 	lv2:requiredFeature urid:map ;
 	lv2:optionalFeature lv2:hardRTCapable ;
@@ -689,7 +689,7 @@ warps:comparator
 
 warps:vocoder
 	a lv2:Plugin ;
-	doap:name "Poly Warps Vocoder" ;
+	doap:name "Poly Twist Vocoder" ;
 	doap:license <http://opensource.org/licenses/gpl> ;
 	lv2:requiredFeature urid:map ;
 	lv2:optionalFeature lv2:hardRTCapable ;
@@ -802,7 +802,7 @@ warps:vocoder
 
 warps:delay
 	a lv2:Plugin ;
-	doap:name "Poly Warps Delay" ;
+	doap:name "Poly Twist Delay" ;
 	doap:license <http://opensource.org/licenses/gpl> ;
 	lv2:requiredFeature urid:map ;
 	lv2:optionalFeature lv2:hardRTCapable ;
@@ -915,7 +915,7 @@ warps:delay
 
 warps:meta
 	a lv2:Plugin ;
-	doap:name "Poly Warps Meta" ;
+	doap:name "Poly Twist Meta" ;
 	doap:license <http://opensource.org/licenses/gpl> ;
 	lv2:requiredFeature urid:map ;
 	lv2:optionalFeature lv2:hardRTCapable ;

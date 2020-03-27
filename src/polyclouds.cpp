@@ -24,14 +24,15 @@
 
 #define clamp(x, lower, upper) (fmax(lower, fmin(x, upper)))
 
-#define CLOUDS_URI "http://polyeffects.com/lv2/polyclouds"
+#define CLOUDS_URI "http://polyeffects.com/lv2/polyclouds#"
 
 /**
    In code, ports are referred to by index.  An enumeration of port indices
    should be defined for readability.
 */
 typedef enum {
-	//
+
+	// CVs
     FREEZE_INPUT = 0,
     TRIG_INPUT = 1,
     POSITION_INPUT = 2,
@@ -44,11 +45,23 @@ typedef enum {
     DENSITY_INPUT = 9,
     TEXTURE_INPUT = 10,
 	REVERSE_INPUT = 11,
-	MODE_INPUT = 12,
-    IN_L_INPUT = 13,
-    IN_R_INPUT = 14,
-    OUT_L_OUTPUT = 15,
-    OUT_R_OUTPUT = 16
+    IN_L_INPUT = 12,
+    IN_R_INPUT = 13,
+    OUT_L_OUTPUT = 14,
+    OUT_R_OUTPUT = 15,
+	// Controls
+	POSITION_PARAM = 16,
+    SIZE_PARAM = 17,
+    PITCH_PARAM = 18,
+    IN_GAIN_PARAM = 19,
+    DENSITY_PARAM = 20,
+    TEXTURE_PARAM = 21,
+    BLEND_PARAM = 22,
+    SPREAD_PARAM = 23,
+    FEEDBACK_PARAM = 24,
+    REVERB_PARAM = 25,
+    FREEZE_PARAM = 26,
+	REVERSE_PARAM = 27,
 } PortIndex;
 
 /**
@@ -71,12 +84,24 @@ typedef struct {
     const float* density;
     const float* texture;
 	const float* reverse;
-	const float* mode;
     const float* in_l;
     const float* in_r;
 	//
     float* out_l;
     float* out_r;
+	//
+	const float* position_param;
+    const float* size_param;
+    const float* pitch_param;
+    const float* in_gain_param;
+    const float* density_param;
+    const float* texture_param;
+    const float* blend_param;
+    const float* spread_param;
+    const float* feedback_param;
+    const float* reverb_param;
+    const float* freeze_param;
+    const float* reverse_param;
 	/* bool is_on; */
 	/* bool was_down; */
 	int buffersize = 1;
@@ -86,7 +111,7 @@ typedef struct {
 	uint8_t *block_mem;
 	uint8_t *block_ccm;
 	clouds::GranularProcessor *processor;
-	clouds::PlaybackMode playbackmode =  clouds::PLAYBACK_MODE_GRANULAR;
+	float in_gain_smooth = 1.0f;
 
 } Clouds;
 
@@ -97,7 +122,7 @@ instantiate(const LV2_Descriptor*     descriptor,
             const LV2_Feature* const* features)
 {
 	Clouds* amp = (Clouds*)calloc(1, sizeof(Clouds));
-	const int memLen = 118784*256;
+	const int memLen = 118784;//*256;
 	const int ccmLen = 65536 - 128;
 	amp->block_mem = new uint8_t[memLen]();
 	amp->block_ccm = new uint8_t[ccmLen]();
@@ -105,6 +130,21 @@ instantiate(const LV2_Descriptor*     descriptor,
 	memset(amp->processor, 0, sizeof(*amp->processor));
 	amp->processor->Init(amp->block_mem, memLen, amp->block_ccm, ccmLen);
 
+	// set feature mode for the difference modules.
+	if (!strcmp (descriptor->URI, CLOUDS_URI "granular")) {
+		amp->processor->set_playback_mode(clouds::PLAYBACK_MODE_GRANULAR);
+	} else if (!strcmp (descriptor->URI, CLOUDS_URI "stretch")) {
+		amp->processor->set_playback_mode(clouds::PLAYBACK_MODE_STRETCH);
+	} else if (!strcmp (descriptor->URI, CLOUDS_URI "looping_delay")) {
+		amp->processor->set_playback_mode(clouds::PLAYBACK_MODE_LOOPING_DELAY);
+	} else if (!strcmp (descriptor->URI, CLOUDS_URI "spectral")) {
+		amp->processor->set_playback_mode(clouds::PLAYBACK_MODE_SPECTRAL);
+	} else if (!strcmp (descriptor->URI, CLOUDS_URI "oliverb")) {
+		amp->processor->set_playback_mode(clouds::PLAYBACK_MODE_OLIVERB);
+	} else if (!strcmp (descriptor->URI, CLOUDS_URI "resonestor")) {
+		amp->processor->set_playback_mode(clouds::PLAYBACK_MODE_RESONESTOR);
+	}
+	
 	return (LV2_Handle)amp;
 }
 
@@ -158,15 +198,50 @@ connect_port(LV2_Handle instance,
 		case REVERSE_INPUT:
 			amp->reverse = (const float*)data;
 			break;
-		case MODE_INPUT:
-			amp->mode = (const float*)data;
-			break;
-			//
 		case OUT_L_OUTPUT:
 			amp->out_l = (float*)data;
 			break;
 		case OUT_R_OUTPUT:
 			amp->out_r = (float*)data;
+			break;
+		case POSITION_PARAM:
+			amp->position_param = (const float*)data;
+			break;
+		case SIZE_PARAM:
+			amp->size_param = (const float*)data;
+			break;
+		case PITCH_PARAM:
+			amp->pitch_param = (const float*)data;
+			break;
+		case IN_GAIN_PARAM:
+			amp->in_gain_param = (const float*)data;
+			break;
+		case DENSITY_PARAM:
+			amp->density_param = (const float*)data;
+			break;
+		case TEXTURE_PARAM:
+			amp->texture_param = (const float*)data;
+			break;
+		case BLEND_PARAM:
+			amp->blend_param = (const float*)data;
+			break;
+		case SPREAD_PARAM:
+			amp->spread_param = (const float*)data;
+			break;
+		case FEEDBACK_PARAM:
+			amp->feedback_param = (const float*)data;
+			break;
+		case REVERB_PARAM:
+			amp->reverb_param = (const float*)data;
+			break;
+		case FREEZE_PARAM:
+			amp->freeze_param = (const float*)data;
+			break;
+		case REVERSE_PARAM:
+			amp->reverse_param = (const float*)data;
+			break;
+
+		default:
 			break;
 	}
 }
@@ -210,36 +285,51 @@ run(LV2_Handle instance, uint32_t n_samples)
     const float* density = amp->density;
     const float* texture = amp->texture;
 	const float* reverse = amp->reverse;
-	const uint8_t mode = (uint8_t)round(*(amp->mode));
 	//
     float* out_l = amp->out_l;
     float* out_r = amp->out_r;
+
+
+	const float position_param = *(amp->position_param);
+    const float size_param = *(amp->size_param);
+    const float pitch_param = *(amp->pitch_param);
+    const float in_gain_param = *(amp->in_gain_param);
+    const float density_param = *(amp->density_param);
+    const float texture_param = *(amp->texture_param);
+    const float blend_param = *(amp->blend_param);
+    const float spread_param = *(amp->spread_param);
+    const float feedback_param = *(amp->feedback_param);
+    const float reverb_param = *(amp->reverb_param);
+    const float freeze_param = *(amp->freeze_param);
+    const float reverse_param = *(amp->reverse_param);
 	//
 	clouds::GranularProcessor *processor = amp->processor;
 
-	// ####### XXX
-	// Get input
-	// change to control * CV? 
 	// Trigger Do i need to persist? 
-	/* uint32_t block_size = 32; */
 	bool triggered = false;
 	uint32_t block_size = 32;
-	for (uint32_t pos = 0; pos < n_samples; pos=pos+block_size) {
-	
-		if (trig[pos] >= 0.8) {
+	if (n_samples < block_size){
+		block_size = n_samples;	
+	}
+	uint32_t pos = 0;
+	while (pos < n_samples){
+		if (trig[pos] >= 1.0) {
 			triggered = true;
 		}
 
 		clouds::ShortFrame input[block_size] = {};
 		for (uint32_t i = 0; i < block_size; i++) {
+			amp->in_gain_smooth += .008f * (in_gain_param - amp->in_gain_smooth);
+			/* input[i].l = clamp(in_l[pos+i] * amp->in_gain_smooth * 32767.0f, -32768.0f, 32767.0f); */
+			/* input[i].r = clamp(in_r[pos+i] * amp->in_gain_smooth * 32767.0f, -32768.0f, 32767.0f); */
 			input[i].l = clamp(in_l[pos+i] * 32767.0f, -32768.0f, 32767.0f);
 			input[i].r = clamp(in_r[pos+i] * 32767.0f, -32768.0f, 32767.0f);
 		}
 		// Set up processor
-		processor->set_num_channels(amp->mono ? 1 : 2);
-		processor->set_low_fidelity(amp->lofi);
-		// TODO Support the other modes
-		processor->set_playback_mode((clouds::PlaybackMode)mode);
+		/* processor->set_num_channels(amp->mono ? 1 : 2); */
+		/* processor->set_low_fidelity(amp->lofi); */
+		processor->set_num_channels(2);
+		processor->set_low_fidelity(false);
 		processor->Prepare();
 
 		uint32_t j = pos;
@@ -247,24 +337,28 @@ run(LV2_Handle instance, uint32_t n_samples)
 		clouds::Parameters* p = processor->mutable_parameters();
 		p->trigger = triggered;
 		p->gate = triggered;
-		p->freeze = (freeze[j] >= 1.0);
-		p->position = clamp(position[j], 0.0f, 1.0f);
-		p->size = clamp(size[j], 0.0f, 1.0f);
-		p->pitch = clamp(pitch[j], -48.0f, 48.0f);
-		p->density = clamp(density[j], 0.0f, 1.0f);
-		p->texture = clamp(texture[j], 0.0f, 1.0f);
-		p->dry_wet = clamp(blend[j], 0.0f, 1.0f);
-		p->stereo_spread =  clamp(spread[j], 0.0f, 1.0f);
-		p->feedback =  clamp(feedback[j], 0.0f, 1.0f);
-		p->reverb =  clamp(reverb[j], 0.0f, 1.0f);
-		p->granular.reverse = (reverse[j] >= 1.0);
+		p->freeze = (/*freeze[j] >= 1.0 ||*/ freeze_param >= 1.0f);
+		p->position = clamp(position_param /*+ position[j] */, 0.0f, 1.0f);
+		p->size = clamp(size_param /*+ size[j] */, 0.0f, 1.0f);
+		p->pitch = clamp(pitch_param /*+ (pitch[j]  * 48.0f) */, -48.0f, 48.0f);
+		p->density = clamp(density_param /*+ density[j] */, 0.0f, 1.0f);
+		p->texture = clamp(texture_param /*+ texture[j] */, 0.0f, 1.0f);
+		p->dry_wet = clamp(blend_param /*+ blend[j] */, 0.0f, 1.0f);
+		p->stereo_spread =  clamp(spread_param /*+ spread[j] */, 0.0f, 1.0f);
+		p->feedback =  clamp(feedback_param /*+ feedback[j] */, 0.0f, 1.0f);
+		p->reverb =  clamp(reverb_param /*+ reverb[j] */, 0.0f, 1.0f);
+		p->granular.reverse = (reverse_param >= 1.0f /* || reverse[j] >= 1.0f */);
 
 		clouds::ShortFrame output[block_size];
-		processor->Process(input, output, 32);
+		processor->Process(input, output, block_size);
 
 		for (uint32_t i = 0; i < block_size; i++) {
 			out_l[pos+i] = output[i].l / 32768.0;
 			out_r[pos+i] = output[i].r / 32768.0;
+		}
+		pos = pos + block_size;
+		if (pos+block_size > n_samples){
+			block_size = n_samples - pos;
 		}
 	}
 
@@ -321,8 +415,63 @@ extension_data(const char* uri)
    descriptors statically to avoid leaking memory and non-portable shared
    library constructors and destructors to clean up properly.
 */
-static const LV2_Descriptor descriptor = {
-	CLOUDS_URI,
+static const LV2_Descriptor descriptor0 = {
+	CLOUDS_URI "granular",
+	instantiate,
+	connect_port,
+	activate,
+	run,
+	deactivate,
+	cleanup,
+	extension_data
+};
+
+static const LV2_Descriptor descriptor1 = {
+	CLOUDS_URI "stretch",
+	instantiate,
+	connect_port,
+	activate,
+	run,
+	deactivate,
+	cleanup,
+	extension_data
+};
+
+static const LV2_Descriptor descriptor2 = {
+	CLOUDS_URI "looping_delay",
+	instantiate,
+	connect_port,
+	activate,
+	run,
+	deactivate,
+	cleanup,
+	extension_data
+};
+
+static const LV2_Descriptor descriptor3 = {
+	CLOUDS_URI "spectral",
+	instantiate,
+	connect_port,
+	activate,
+	run,
+	deactivate,
+	cleanup,
+	extension_data
+};
+
+static const LV2_Descriptor descriptor4 = {
+	CLOUDS_URI "oliverb",
+	instantiate,
+	connect_port,
+	activate,
+	run,
+	deactivate,
+	cleanup,
+	extension_data
+};
+
+static const LV2_Descriptor descriptor5 = {
+	CLOUDS_URI "resonestor",
 	instantiate,
 	connect_port,
 	activate,
@@ -346,7 +495,19 @@ const LV2_Descriptor*
 lv2_descriptor(uint32_t index)
 {
 	switch (index) {
-	case 0:  return &descriptor;
-	default: return NULL;
+		case 0:
+			return &descriptor0;
+		case 1:
+			return &descriptor1;
+		case 2:
+			return &descriptor2;
+		case 3:
+			return &descriptor3;
+		case 4:
+			return &descriptor4;
+		case 5:
+			return &descriptor5;
+		default:
+			return NULL;
 	}
 }
