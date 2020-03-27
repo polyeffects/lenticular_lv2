@@ -337,17 +337,17 @@ run(LV2_Handle instance, uint32_t n_samples)
 		clouds::Parameters* p = processor->mutable_parameters();
 		p->trigger = triggered;
 		p->gate = triggered;
-		p->freeze = (/*freeze[j] >= 1.0 ||*/ freeze_param >= 1.0f);
-		p->position = clamp(position_param /*+ position[j] */, 0.0f, 1.0f);
-		p->size = clamp(size_param /*+ size[j] */, 0.0f, 1.0f);
-		p->pitch = clamp(pitch_param /*+ (pitch[j]  * 48.0f) */, -48.0f, 48.0f);
-		p->density = clamp(density_param /*+ density[j] */, 0.0f, 1.0f);
-		p->texture = clamp(texture_param /*+ texture[j] */, 0.0f, 1.0f);
-		p->dry_wet = clamp(blend_param /*+ blend[j] */, 0.0f, 1.0f);
-		p->stereo_spread =  clamp(spread_param /*+ spread[j] */, 0.0f, 1.0f);
-		p->feedback =  clamp(feedback_param /*+ feedback[j] */, 0.0f, 1.0f);
-		p->reverb =  clamp(reverb_param /*+ reverb[j] */, 0.0f, 1.0f);
-		p->granular.reverse = (reverse_param >= 1.0f /* || reverse[j] >= 1.0f */);
+		p->freeze = (freeze[j] >= 1.0 || freeze_param >= 1.0f);
+		p->position = clamp(position_param + position[j], 0.0f, 1.0f);
+		p->size = clamp(size_param + size[j], 0.0f, 1.0f);
+		p->pitch = clamp(pitch_param + (pitch[j] * 48.0f), -48.0f, 48.0f);
+		p->density = clamp(density_param + density[j], 0.0f, 1.0f);
+		p->texture = clamp(texture_param + texture[j], 0.0f, 1.0f);
+		p->dry_wet = clamp(blend_param + blend[j], 0.0f, 1.0f);
+		p->stereo_spread =  clamp(spread_param + spread[j], 0.0f, 1.0f);
+		p->feedback =  clamp(feedback_param + feedback[j], 0.0f, 1.0f);
+		p->reverb =  clamp(reverb_param + reverb[j], 0.0f, 1.0f);
+		p->granular.reverse = (reverse_param >= 1.0f || reverse[j] >= 1.0f);
 
 		clouds::ShortFrame output[block_size];
 		processor->Process(input, output, block_size);
