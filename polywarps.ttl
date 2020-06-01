@@ -21,7 +21,7 @@ warps:doppler
 		lv2:index 0 ;
 		lv2:symbol "x_coord" ; # ALGORITHM_PARAM
 		lv2:name "x_coord" ;
-		lv2:default 0.0 ;
+		lv2:default 4.45 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 8.0 ;
 	] , [
@@ -30,7 +30,7 @@ warps:doppler
 		lv2:index 1 ;
 		lv2:symbol "y_coord" ; # TIMBRE_PARAM
 		lv2:name "y_coord";
-		lv2:default 0.5 ;
+		lv2:default 0.04 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
 	] , [
@@ -39,7 +39,7 @@ warps:doppler
 		lv2:index 2 ;
 		lv2:symbol "space_size" ; # SHAPE_PARAM
 		lv2:name "space_size";
-		lv2:default 0.0 ;
+		lv2:default 2.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 3.0 ;
 	] , [
@@ -48,16 +48,16 @@ warps:doppler
 		lv2:index 3 ;
 		lv2:symbol "lfo_frequency" ; # LEVEL1_PARAM
 		lv2:name "lfo_frequency" ;
-		lv2:default 1.0 ;
+		lv2:default 0.11 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
 	] , [
 		a lv2:InputPort ,
 			lv2:ControlPort ;
 		lv2:index 4 ;
-		lv2:symbol "lfo_amplitude" ; # LEVEL2_PARAM
+		lv2:symbol "lfo_amplitude" ; # LEVEL2_PARAMa
 		lv2:name "lfo_amplitude" ;
-		lv2:default 1.0 ;
+		lv2:default 0.22 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
 	] , [
@@ -475,7 +475,7 @@ warps:bitcrusher
 		lv2:name "bits" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
-		lv2:maximum 8.0 ;
+		lv2:maximum 3.0 ;
 	] , [
 		a lv2:InputPort ,
 			lv2:ControlPort ;
@@ -500,7 +500,7 @@ warps:bitcrusher
 		lv2:index 3 ;
 		lv2:symbol "input_amp" ; # LEVEL1_PARAM
 		lv2:name "amp or freq" ;
-		lv2:default 1.0 ;
+		lv2:default 0.04 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
 	] , [
@@ -509,7 +509,7 @@ warps:bitcrusher
 		lv2:index 4 ;
 		lv2:symbol "input_amp_2" ; # LEVEL2_PARAM
 		lv2:name "input amplitude 2" ;
-		lv2:default 1.0 ;
+		lv2:default 0.14 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
 	] , [
@@ -812,7 +812,7 @@ warps:delay
 		lv2:index 0 ;
 		lv2:symbol "speed_direction" ; # ALGORITHM_PARAM
 		lv2:name "speed direction" ;
-		lv2:default 0.0 ;
+		lv2:default 2.39 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 8.0 ;
 	] , [
@@ -821,7 +821,7 @@ warps:delay
 		lv2:index 1 ;
 		lv2:symbol "length" ; # TIMBRE_PARAM
 		lv2:name "length";
-		lv2:default 0.5 ;
+		lv2:default 0.92 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
 	] , [
@@ -830,7 +830,7 @@ warps:delay
 		lv2:index 2 ;
 		lv2:symbol "mode" ; # SHAPE_PARAM
 		lv2:name "mode";
-		lv2:default 0.0 ;
+		lv2:default 1.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 3.0 ;
 	] , [
@@ -839,7 +839,7 @@ warps:delay
 		lv2:index 3 ;
 		lv2:symbol "feedback" ; # LEVEL1_PARAM
 		lv2:name "feedback" ;
-		lv2:default 1.0 ;
+		lv2:default 0.75 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
 	] , [
@@ -848,7 +848,7 @@ warps:delay
 		lv2:index 4 ;
 		lv2:symbol "dry_wet" ; # LEVEL2_PARAM
 		lv2:name "dry wet" ;
-		lv2:default 1.0 ;
+		lv2:default 0.5 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
 	] , [

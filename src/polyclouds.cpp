@@ -112,6 +112,15 @@ typedef struct {
 	uint8_t *block_ccm;
 	clouds::GranularProcessor *processor;
 	float in_gain_smooth = 1.0f;
+	float position_smooth = 0.5f;
+    float size_smooth = 0.5f;
+    float pitch_smooth = 0.5f;
+    float density_smooth = 0.5f;
+    float texture_smooth = 0.5f;
+    float blend_smooth = 0.5f;
+    float spread_smooth = 0.5f;
+    float feedback_smooth = 0.5f;
+    float reverb_smooth = 0.5f;
 
 } Clouds;
 
@@ -334,20 +343,31 @@ run(LV2_Handle instance, uint32_t n_samples)
 
 		uint32_t j = pos;
 
+
 		clouds::Parameters* p = processor->mutable_parameters();
 		p->trigger = triggered;
 		p->gate = triggered;
 		p->freeze = (freeze[j] >= 1.0 || freeze_param >= 1.0f);
-		p->position = clamp(position_param + position[j], 0.0f, 1.0f);
-		p->size = clamp(size_param + size[j], 0.0f, 1.0f);
-		p->pitch = clamp(pitch_param + (pitch[j] * 48.0f), -48.0f, 48.0f);
-		p->density = clamp(density_param + density[j], 0.0f, 1.0f);
-		p->texture = clamp(texture_param + texture[j], 0.0f, 1.0f);
-		p->dry_wet = clamp(blend_param + blend[j], 0.0f, 1.0f);
-		p->stereo_spread =  clamp(spread_param + spread[j], 0.0f, 1.0f);
-		p->feedback =  clamp(feedback_param + feedback[j], 0.0f, 1.0f);
-		p->reverb =  clamp(reverb_param + reverb[j], 0.0f, 1.0f);
 		p->granular.reverse = (reverse_param >= 1.0f || reverse[j] >= 1.0f);
+
+        amp->position_smooth += .008f * (position_param - amp->position_smooth);
+		p->position = clamp(amp->position_smooth + position[j], 0.0f, 1.0f);
+        amp->size_smooth += .008f * (size_param - amp->size_smooth);
+		p->size = clamp(amp->size_smooth + size[j], 0.0f, 1.0f);
+        amp->pitch_smooth += .008f * (pitch_param - amp->pitch_smooth);
+		p->pitch = clamp(amp->pitch_smooth + (pitch[j] * 48.0f), -48.0f, 48.0f);
+        amp->density_smooth += .008f * (density_param - amp->density_smooth);
+		p->density = clamp(amp->density_smooth + density[j], 0.0f, 1.0f);
+        amp->texture_smooth += .008f * (texture_param - amp->texture_smooth);
+		p->texture = clamp(amp->texture_smooth + texture[j], 0.0f, 1.0f);
+        amp->blend_smooth += .008f * (blend_param - amp->blend_smooth);
+		p->dry_wet = clamp(amp->blend_smooth + blend[j], 0.0f, 1.0f);
+        amp->spread_smooth += .008f * (spread_param - amp->spread_smooth);
+		p->stereo_spread =  clamp(amp->spread_smooth + spread[j], 0.0f, 1.0f);
+        amp->feedback_smooth += .008f * (feedback_param - amp->feedback_smooth);
+		p->feedback =  clamp(amp->feedback_smooth + feedback[j], 0.0f, 1.0f);
+        amp->reverb_smooth += .008f * (reverb_param - amp->reverb_smooth);
+		p->reverb =  clamp(amp->reverb_smooth + reverb[j], 0.0f, 1.0f);
 
 		clouds::ShortFrame output[block_size];
 		processor->Process(input, output, block_size);

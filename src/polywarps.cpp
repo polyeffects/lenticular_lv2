@@ -70,6 +70,11 @@ typedef struct {
 
 	warps::Modulator modulator;
 
+	float algorithm_smooth = 0.5f;
+    float timbre_smooth = 0.5f;
+    float level1_smooth = 0.5f;
+    float level2_smooth = 0.5f;
+
 } Warps;
 
 static LV2_Handle
@@ -78,7 +83,7 @@ instantiate(const LV2_Descriptor*     descriptor,
             const char*               bundle_path,
             const LV2_Feature* const* features)
 {
-	Warps* amp = (Warps*)calloc(1, sizeof(Warps));
+	Warps* amp = new Warps();
 
 	memset(&amp->modulator, 0, sizeof(amp->modulator));
     amp->modulator.Init(48000.0f);
@@ -217,19 +222,25 @@ run(LV2_Handle instance, uint32_t n_samples)
         warps::Parameters *p = modulator->mutable_parameters();
 
         p->carrier_shape = shape_param % 4;
-        p->channel_drive[0] = clamp(level1_param + level1_input[j], 0.0f, 1.0f);
-        p->channel_drive[1] = clamp(level2_param + level2_input[j], 0.0f, 1.0f);
-        p->modulation_algorithm = clamp(algorithm_param / 8.0f + algorithm_input[j], 0.0f, 1.0f);
-        p->modulation_parameter = clamp(timbre_param + timbre_input[j], 0.0f, 1.0f);
 
-		p->raw_level[0] = clamp(level1_param, 0.0f, 1.0f);
-		p->raw_level[1] = clamp(level2_param, 0.0f, 1.0f);
+        amp->level1_smooth += .008f * (level1_param - amp->level1_smooth);
+        amp->level2_smooth += .008f * (level2_param - amp->level2_smooth);
+        amp->algorithm_smooth += .008f * (algorithm_param - amp->algorithm_smooth);
+        amp->timbre_smooth += .008f * (timbre_param - amp->timbre_smooth);
 
-		p->raw_algorithm_pot = algorithm_param / 8.0;
+        p->channel_drive[0] = clamp(amp->level1_smooth + level1_input[j], 0.0f, 1.0f);
+        p->channel_drive[1] = clamp(amp->level2_smooth + level2_input[j], 0.0f, 1.0f);
+        p->modulation_algorithm = clamp(amp->algorithm_smooth / 8.0f + algorithm_input[j], 0.0f, 1.0f);
+        p->modulation_parameter = clamp(amp->timbre_smooth + timbre_input[j], 0.0f, 1.0f);
+
+		p->raw_level[0] = clamp(amp->level1_smooth, 0.0f, 1.0f);
+		p->raw_level[1] = clamp(amp->level2_smooth, 0.0f, 1.0f);
+
+		p->raw_algorithm_pot = amp->algorithm_smooth / 8.0;
         p->raw_algorithm_cv  = clamp(algorithm_input[j], -1.0f, 1.0f);
         p->raw_algorithm = p->modulation_algorithm;
 
-        p->note = 60.0 * level1_param + 12.0 * level1_input[j]+ 12.0;
+        p->note = 60.0 * amp->level1_smooth + 12.0 * level1_input[j]+ 12.0;
 
 		warps::ShortFrame output[block_size];
         modulator->Process(input, output, block_size);
@@ -271,9 +282,9 @@ deactivate(LV2_Handle instance)
 static void
 cleanup(LV2_Handle instance)
 {
-	Warps* const amp = (Warps*)instance;
+	Warps* amp = (Warps*)instance;
 	/* delete amp->modulator; */
-	free(instance);
+	delete amp;
 }
 
 /**
