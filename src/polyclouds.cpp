@@ -326,7 +326,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 			triggered = true;
 		}
 
-		clouds::ShortFrame input[block_size] = {};
+		clouds::ShortFrame input[block_size];
 		for (uint32_t i = 0; i < block_size; i++) {
 			amp->in_gain_smooth += .008f * (in_gain_param - amp->in_gain_smooth);
 			/* input[i].l = clamp(in_l[pos+i] * amp->in_gain_smooth * 32767.0f, -32768.0f, 32767.0f); */
