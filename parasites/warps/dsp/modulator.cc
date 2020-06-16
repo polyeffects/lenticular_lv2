@@ -619,11 +619,11 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
       fb.l = feedback_sample.r * feedback * 1.1f;
       fb.r = feedback_sample.l * feedback * 1.1f;
     } else if (parameters_.carrier_shape == 2) {
-      // simulate tape hiss with a bit of noise
-      float noise1 = Random::GetFloat();
-      float noise2 = Random::GetFloat();
-      fb.l = feedback_sample.l + noise1 * 0.002f;
-      fb.r = feedback_sample.r + noise2 * 0.002f;
+      // disable simulate tape hiss with a bit of noise
+      /* float noise1 = Random::GetFloat(); */
+      /* float noise2 = Random::GetFloat(); */
+      fb.l = feedback_sample.l; // + noise1 * 0.002f;
+      fb.r = feedback_sample.r; // + noise2 * 0.002f;
       // apply filters: fixed high-pass and varying low-pass with attenuation
       filter_[2].set_f<stmlib::FREQUENCY_FAST>(feedback / 12.0f);
       filter_[3].set_f<stmlib::FREQUENCY_FAST>(feedback / 12.0f);

@@ -212,7 +212,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 
 	uint32_t pos = 0;
 	while (pos < n_samples){
-		warps::ShortFrame input[block_size] = {};
+		warps::ShortFrame input[block_size];
 		for (uint32_t i = 0; i < block_size; i++) {
 			input[i].l = clamp(carrier_input[pos+i] * 32767.0f, -32768.0f, 32767.0f);
 			input[i].r = clamp(modulator_input[pos+i] * 32767.0f, -32768.0f, 32767.0f);
