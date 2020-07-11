@@ -83,3 +83,7 @@ warps:meta
 	lv2:binary <polyplaits.so> ;
 	rdfs:seeAlso <polyplaits.ttl> .
 
+<http://polyeffects.com/lv2/polygrids>
+	a lv2:Plugin ;
+	lv2:binary <polygrids.so> ;
+	rdfs:seeAlso <polygrids.ttl> .

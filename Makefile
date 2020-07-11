@@ -19,6 +19,7 @@ LOADLIBES=-lm
 LV2NAME_CLOUDS=polyclouds
 LV2NAME_WARPS=polywarps
 LV2NAME_PLAITS=polyplaits
+LV2NAME_GRIDS=polygrids
 BUNDLE=polylenticular.lv2
 BUILDDIR=build/
 targets=
@@ -49,6 +50,7 @@ endif
 targets+=$(BUILDDIR)$(LV2NAME_CLOUDS)$(LIB_EXT)
 targets+=$(BUILDDIR)$(LV2NAME_WARPS)$(LIB_EXT)
 targets+=$(BUILDDIR)$(LV2NAME_PLAITS)$(LIB_EXT)
+targets+=$(BUILDDIR)$(LV2NAME_GRIDS)$(LIB_EXT)
 
 ###############################################################################
 # extract versions
@@ -81,6 +83,11 @@ WARPS_SOURCES = src/polywarps.cpp \
 	parasites/stmlib/dsp/atan.cc \
 	parasites/stmlib/dsp/units.cc 
 
+GRIDS_SOURCES = src/polygrids.cpp \
+	src/Metronome.cpp  \
+	src/TopographPatternGenerator.cpp \
+	src/Oneshot.cpp
+
 PLAITS_SOURCES = src/polyplaits.cpp 
 PLAITS_SOURCES += $(wildcard eurorack/plaits/dsp/*.cc)
 PLAITS_SOURCES += $(wildcard eurorack/plaits/dsp/engine/*.cc)
@@ -90,6 +97,7 @@ PLAITS_SOURCES += eurorack/plaits/resources.cc
 PLAITS_SOURCES += eurorack/stmlib/utils/random.cc
 PLAITS_SOURCES += eurorack/stmlib/dsp/atan.cc
 PLAITS_SOURCES += eurorack/stmlib/dsp/units.cc
+
 
 FLAGS += \
 	-DTEST \
@@ -108,7 +116,7 @@ override CFLAGS += `$(PKG_CONFIG) --cflags lv2`
 # build target definitions
 default: all
 
-all: $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(targets)
+all: $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(BUILDDIR)$(LV2NAME_GRIDS).ttl $(targets)
 
 lv2syms:
 	echo "_lv2_descriptor" > lv2syms
@@ -129,6 +137,10 @@ $(BUILDDIR)$(LV2NAME_PLAITS).ttl: $(LV2NAME_PLAITS).ttl
 	@mkdir -p $(BUILDDIR)
 	cat $(LV2NAME_PLAITS).ttl > $(BUILDDIR)$(LV2NAME_PLAITS).ttl
 
+$(BUILDDIR)$(LV2NAME_GRIDS).ttl: $(LV2NAME_GRIDS).ttl
+	@mkdir -p $(BUILDDIR)
+	cat $(LV2NAME_GRIDS).ttl > $(BUILDDIR)$(LV2NAME_GRIDS).ttl
+
 $(BUILDDIR)$(LV2NAME_CLOUDS)$(LIB_EXT): $(CLOUDS_SOURCES) 
 	@mkdir -p $(BUILDDIR)
 	$(CXX) $(CPPFLAGS) $(CFLAGS) $(FLAGS) \
@@ -148,6 +160,12 @@ $(BUILDDIR)$(LV2NAME_PLAITS)$(LIB_EXT): $(PLAITS_SOURCES)
 	  -o $(BUILDDIR)$(LV2NAME_PLAITS)$(LIB_EXT) $(PLAITS_SOURCES) \
 		-shared $(LV2LDFLAGS) $(LDFLAGS) $(LOADLIBES)
 
+$(BUILDDIR)$(LV2NAME_GRIDS)$(LIB_EXT): $(GRIDS_SOURCES) 
+	@mkdir -p $(BUILDDIR)
+	$(CXX) $(CPPFLAGS) $(CFLAGS) \
+	  -o $(BUILDDIR)$(LV2NAME_GRIDS)$(LIB_EXT) $(GRIDS_SOURCES) \
+		-shared $(LV2LDFLAGS) $(LDFLAGS) $(LOADLIBES)
+
 # install/uninstall/clean target definitions
 
 install: all
@@ -155,7 +173,8 @@ install: all
 	install -m755 $(BUILDDIR)$(LV2NAME_CLOUDS)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 	install -m755 $(BUILDDIR)$(LV2NAME_WARPS)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 	install -m755 $(BUILDDIR)$(LV2NAME_PLAITS)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
-	install -m644 $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	install -m755 $(BUILDDIR)$(LV2NAME_GRIDS)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	install -m644 $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(BUILDDIR)$(LV2NAME_GRIDS).ttl $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 
 uninstall:
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/manifest.ttl
@@ -165,6 +184,8 @@ uninstall:
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_WARPS)$(LIB_EXT)
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_PLAITS).ttl
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_PLAITS)$(LIB_EXT)
+	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_GRIDS).ttl
+	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_GRIDS)$(LIB_EXT)
 	-rmdir $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 
 $(LV2NAME_CLOUDS)debug : clean $(RES_OBJECTS)
