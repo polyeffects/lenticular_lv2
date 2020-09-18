@@ -152,6 +152,8 @@ instantiate(const LV2_Descriptor*     descriptor,
 		amp->processor->set_playback_mode(clouds::PLAYBACK_MODE_OLIVERB);
 	} else if (!strcmp (descriptor->URI, CLOUDS_URI "resonestor")) {
 		amp->processor->set_playback_mode(clouds::PLAYBACK_MODE_RESONESTOR);
+	} else if (!strcmp (descriptor->URI, CLOUDS_URI "beat_repeat")) {
+		amp->processor->set_playback_mode(clouds::PLAYBACK_MODE_KAMMERL);
 	}
 	
 	return (LV2_Handle)amp;
@@ -501,6 +503,17 @@ static const LV2_Descriptor descriptor5 = {
 	extension_data
 };
 
+static const LV2_Descriptor descriptor6 = {
+	CLOUDS_URI "beat_repeat",
+	instantiate,
+	connect_port,
+	activate,
+	run,
+	deactivate,
+	cleanup,
+	extension_data
+};
+
 /**
    The `lv2_descriptor()` function is the entry point to the plugin library.  The
    host will load the library and call this function repeatedly with increasing
@@ -527,6 +540,8 @@ lv2_descriptor(uint32_t index)
 			return &descriptor4;
 		case 5:
 			return &descriptor5;
+		case 6:
+			return &descriptor6;
 		default:
 			return NULL;
 	}

@@ -67,8 +67,8 @@ includes = """
 #include "stmlib/stmlib.h"
 """
 
-import lookup_tables
-import src_filters
+from . import lookup_tables
+from . import src_filters
 
 create_specialized_manager = True
 

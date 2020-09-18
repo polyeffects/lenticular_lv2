@@ -10,10 +10,10 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,13 +21,16 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-# 
+#
 # See http://creativecommons.org/licenses/MIT/ for more information.
 #
 # -----------------------------------------------------------------------------
 #
 # Lookup table definitions.
 
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 import scipy.signal
 import numpy
 import pylab
@@ -36,11 +39,27 @@ lookup_tables = []
 int16_lookup_tables = []
 
 """----------------------------------------------------------------------------
+FreqLog table.
+----------------------------------------------------------------------------"""
+
+size = 128
+t = numpy.arange(1, size)
+lookup_tables.append(('freq_log', numpy.exp(old_div(numpy.log(old_div(4096,2)), t) )))
+
+"""----------------------------------------------------------------------------
+Tanh table.
+----------------------------------------------------------------------------"""
+
+size = 1024
+t = numpy.arange(0, size) / float(old_div(size,2))
+lookup_tables.append(('inv_tanh', old_div(numpy.tanh(t), numpy.tanh(1.0))))
+
+"""----------------------------------------------------------------------------
 Cosine table.
 ----------------------------------------------------------------------------"""
 
 size = 1024
-t = numpy.arange(0, size + size / 4 + 1) / float(size) * numpy.pi * 2
+t = numpy.arange(0, size + old_div(size, 4) + 1) / float(size) * numpy.pi * 2
 lookup_tables.append(('sin', numpy.sin(t)))
 
 """----------------------------------------------------------------------------
@@ -49,7 +68,7 @@ Raised cosine.
 
 size = 256
 t = numpy.arange(0, size + 1) / float(size)
-lookup_tables.append(('raised_cos', 1.0 - (numpy.cos(t * numpy.pi) + 1) / 2))
+lookup_tables.append(('raised_cos', 1.0 - old_div((numpy.cos(t * numpy.pi) + 1), 2)))
 
 """----------------------------------------------------------------------------
 XFade table
@@ -60,7 +79,7 @@ t = numpy.arange(0, size) / float(size-1)
 t = 1.04 * t - 0.02
 t[t < 0] = 0
 t[t >= 1] = 1
-t *= numpy.pi / 2
+t *= old_div(numpy.pi, 2)
 lookup_tables.append(('xfade_in', numpy.sin(t) * (2 ** -0.5)))
 lookup_tables.append(('xfade_out', numpy.cos(t) * (2 ** -0.5)))
 
@@ -70,7 +89,7 @@ Grain window.
 
 size = 4096
 t = numpy.arange(0, size + 1) / float(size)
-lookup_tables.append(('window', 1.0 - (numpy.cos(t * numpy.pi) + 1) / 2))
+lookup_tables.append(('window', 1.0 - old_div((numpy.cos(t * numpy.pi) + 1), 2)))
 
 
 """----------------------------------------------------------------------------
@@ -80,16 +99,16 @@ Sine window.
 def sum_window(window, steps):
   n = window.shape[0]
   start = 0
-  stride = n / steps
+  stride = old_div(n, steps)
   s = 0
-  for i in xrange(steps):
+  for i in range(steps):
     s = s + window[start:start+stride] ** 2
     start += stride
   return s
 
 
 window_size = 4096
-t = numpy.arange(0.0, window_size) / window_size
+t = old_div(numpy.arange(0.0, window_size), window_size)
 
 # Perfect reconstruction for overlap of 2
 sine = numpy.sin(numpy.pi * t)
@@ -114,7 +133,7 @@ Linear to dB, for display
 db = numpy.arange(0, 257)
 db[0] = 1
 db[db > 255] = 255
-db = numpy.log2(db / 16.0) * 32768 / 4
+db = old_div(numpy.log2(db / 16.0) * 32768, 4)
 int16_lookup_tables += [('db', db)]
 
 
@@ -125,7 +144,7 @@ LPG cutoff
 
 TABLE_SIZE = 256
 
-cutoff = numpy.arange(0.0, TABLE_SIZE + 1) / TABLE_SIZE
+cutoff = old_div(numpy.arange(0.0, TABLE_SIZE + 1), TABLE_SIZE)
 lookup_tables.append(('cutoff', 0.49 * 2 ** (-6 * (1 - cutoff))))
 
 
@@ -134,7 +153,7 @@ lookup_tables.append(('cutoff', 0.49 * 2 ** (-6 * (1 - cutoff))))
 Grain size table
 ----------------------------------------------------------------------------"""
 
-size = numpy.arange(0.0, TABLE_SIZE + 1) / TABLE_SIZE * 5
+size = old_div(numpy.arange(0.0, TABLE_SIZE + 1), TABLE_SIZE) * 5
 lookup_tables.append(('grain_size', numpy.floor(512 * (2 ** size))))
 
 
@@ -148,11 +167,11 @@ pitch = numpy.zeros((PITCH_TABLE_SIZE, ))
 notches = [-24, -12, -7, -4, -3, -1, -0.1, 0,
            0.1, 1, 3, 4, 7, 12, 12, 24]
 n = len(notches) - 1
-for i in xrange(n):
+for i in range(n):
   start_index = int(float(i) / n * PITCH_TABLE_SIZE)
   end_index = int(float(i + 1) / n * PITCH_TABLE_SIZE)
   length = end_index - start_index
-  x = numpy.arange(0.0, length) / (length - 1)
+  x = old_div(numpy.arange(0.0, length), (length - 1))
   raised_cosine = 0.5 - 0.5 * numpy.cos(x * numpy.pi)
   xfade = 0.8 * raised_cosine + 0.2 * x
   pitch[start_index:end_index] = notches[i] + (notches[i + 1] - notches[i]) * xfade

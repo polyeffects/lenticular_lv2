@@ -33,6 +33,11 @@ clouds:granular
 	lv2:binary <polyclouds.so> ;
 	rdfs:seeAlso <polyclouds.ttl> .
 
+clouds:beat_repeat
+	a lv2:Plugin ;
+	lv2:binary <polyclouds.so> ;
+	rdfs:seeAlso <polyclouds.ttl> .
+
 warps:doppler
 	a lv2:Plugin ;
 	lv2:binary <polywarps.so> ;
