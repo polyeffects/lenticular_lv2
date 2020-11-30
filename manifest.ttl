@@ -92,3 +92,8 @@ warps:meta
 	a lv2:Plugin ;
 	lv2:binary <polygrids.so> ;
 	rdfs:seeAlso <polygrids.ttl> .
+
+<http://polyeffects.com/lv2/polymarbles>
+	a lv2:Plugin ;
+	lv2:binary <polymarbles.so> ;
+	rdfs:seeAlso <polymarbles.ttl> .

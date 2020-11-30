@@ -122,6 +122,8 @@ typedef struct {
     float feedback_smooth = 0.5f;
     float reverb_smooth = 0.5f;
 
+	bool prev_trigger = false;
+
 } Clouds;
 
 static LV2_Handle
@@ -324,8 +326,14 @@ run(LV2_Handle instance, uint32_t n_samples)
 	}
 	uint32_t pos = 0;
 	while (pos < n_samples){
-		if (trig[pos] >= 1.0) {
-			triggered = true;
+		triggered = false;
+		if (trig[pos] >= 1) {
+			if (!(amp->prev_trigger)){
+				triggered = true;
+				amp->prev_trigger = true;
+			}
+		} else {
+			amp->prev_trigger = false;
 		}
 
 		clouds::ShortFrame input[block_size];
@@ -357,7 +365,7 @@ run(LV2_Handle instance, uint32_t n_samples)
         amp->size_smooth += .008f * (size_param - amp->size_smooth);
 		p->size = clamp(amp->size_smooth + size[j], 0.0f, 1.0f);
         amp->pitch_smooth += .008f * (pitch_param - amp->pitch_smooth);
-		p->pitch = clamp(amp->pitch_smooth + (pitch[j] * 48.0f), -48.0f, 48.0f);
+		p->pitch = clamp(amp->pitch_smooth + (pitch[j] * 12.0f), -48.0f, 48.0f);
         amp->density_smooth += .008f * (density_param - amp->density_smooth);
 		p->density = clamp(amp->density_smooth + density[j], 0.0f, 1.0f);
         amp->texture_smooth += .008f * (texture_param - amp->texture_smooth);

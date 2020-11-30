@@ -1,11 +1,11 @@
 #!/usr/bin/make -f
-# OPTIMIZATIONS ?= -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer -O3 -fno-finite-math-only -DNDEBUG
+OPTIMIZATIONS ?= -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer -O3 -fno-finite-math-only -DNDEBUG
 # OPTIMIZATIONS = -msse
 # OPTIMIZATIONS ?= -mtune=cortex-a53 -funsafe-math-optimizations -ffast-math -fomit-frame-pointer -O3 -fno-finite-math-only -fvisibility=hidden -fdata-sections -ffunction-sections  -DNDEBUG # -fopt-info-vec-optimize
 PREFIX ?= /usr
 
 DEBUGFLAGS = -D_FORTIFY_SOURCE=2 -O0 -g -Wl,-z,relro,-z,now -fPIC -DPIC -Wall -D DEBUG -D NOSSE
-CFLAGS ?= $(OPTIMIZATIONS) $(DEBUGFLAGS)
+CFLAGS ?= -fPIC $(OPTIMIZATIONS) #$(DEBUGFLAGS)
 
 PKG_CONFIG?=pkg-config
 STRIP?=strip
@@ -20,6 +20,7 @@ LV2NAME_CLOUDS=polyclouds
 LV2NAME_WARPS=polywarps
 LV2NAME_PLAITS=polyplaits
 LV2NAME_GRIDS=polygrids
+LV2NAME_MARBLES=polymarbles
 BUNDLE=polylenticular.lv2
 BUILDDIR=build/
 targets=
@@ -51,6 +52,7 @@ targets+=$(BUILDDIR)$(LV2NAME_CLOUDS)$(LIB_EXT)
 targets+=$(BUILDDIR)$(LV2NAME_WARPS)$(LIB_EXT)
 targets+=$(BUILDDIR)$(LV2NAME_PLAITS)$(LIB_EXT)
 targets+=$(BUILDDIR)$(LV2NAME_GRIDS)$(LIB_EXT)
+targets+=$(BUILDDIR)$(LV2NAME_MARBLES)$(LIB_EXT)
 
 ###############################################################################
 # extract versions
@@ -89,6 +91,18 @@ GRIDS_SOURCES = src/polygrids.cpp \
 	src/TopographPatternGenerator.cpp \
 	src/Oneshot.cpp
 
+MARBLES_SOURCES = src/polymarbles.cpp 
+MARBLES_SOURCES += eurorack/stmlib/utils/random.cc
+MARBLES_SOURCES += eurorack/stmlib/dsp/atan.cc
+MARBLES_SOURCES += eurorack/stmlib/dsp/units.cc
+MARBLES_SOURCES += eurorack/marbles/random/t_generator.cc
+MARBLES_SOURCES += eurorack/marbles/random/x_y_generator.cc
+MARBLES_SOURCES += eurorack/marbles/random/output_channel.cc
+MARBLES_SOURCES += eurorack/marbles/random/lag_processor.cc
+MARBLES_SOURCES += eurorack/marbles/random/quantizer.cc
+MARBLES_SOURCES += eurorack/marbles/ramp/ramp_extractor.cc
+MARBLES_SOURCES += eurorack/marbles/resources.cc
+
 PLAITS_SOURCES = src/polyplaits.cpp 
 PLAITS_SOURCES += $(wildcard eurorack/plaits/dsp/*.cc)
 PLAITS_SOURCES += $(wildcard eurorack/plaits/dsp/engine/*.cc)
@@ -117,7 +131,7 @@ override CFLAGS += `$(PKG_CONFIG) --cflags lv2`
 # build target definitions
 default: all
 
-all: $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(BUILDDIR)$(LV2NAME_GRIDS).ttl $(targets)
+all: $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(BUILDDIR)$(LV2NAME_GRIDS).ttl $(BUILDDIR)$(LV2NAME_MARBLES).ttl $(targets)
 
 lv2syms:
 	echo "_lv2_descriptor" > lv2syms
@@ -141,6 +155,10 @@ $(BUILDDIR)$(LV2NAME_PLAITS).ttl: $(LV2NAME_PLAITS).ttl
 $(BUILDDIR)$(LV2NAME_GRIDS).ttl: $(LV2NAME_GRIDS).ttl
 	@mkdir -p $(BUILDDIR)
 	cat $(LV2NAME_GRIDS).ttl > $(BUILDDIR)$(LV2NAME_GRIDS).ttl
+
+$(BUILDDIR)$(LV2NAME_MARBLES).ttl: $(LV2NAME_MARBLES).ttl
+	@mkdir -p $(BUILDDIR)
+	cat $(LV2NAME_MARBLES).ttl > $(BUILDDIR)$(LV2NAME_MARBLES).ttl
 
 $(BUILDDIR)$(LV2NAME_CLOUDS)$(LIB_EXT): $(CLOUDS_SOURCES) 
 	@mkdir -p $(BUILDDIR)
@@ -167,6 +185,12 @@ $(BUILDDIR)$(LV2NAME_GRIDS)$(LIB_EXT): $(GRIDS_SOURCES)
 	  -o $(BUILDDIR)$(LV2NAME_GRIDS)$(LIB_EXT) $(GRIDS_SOURCES) \
 		-shared $(LV2LDFLAGS) $(LDFLAGS) $(LOADLIBES)
 
+$(BUILDDIR)$(LV2NAME_MARBLES)$(LIB_EXT): $(MARBLES_SOURCES) 
+	@mkdir -p $(BUILDDIR)
+	$(CXX) $(CPPFLAGS) $(MUT_FLAGS) -fPIC \
+	  -o $(BUILDDIR)$(LV2NAME_MARBLES)$(LIB_EXT) $(MARBLES_SOURCES) \
+		-shared $(LV2LDFLAGS) $(LDFLAGS) $(LOADLIBES)
+
 # install/uninstall/clean target definitions
 
 install: all
@@ -175,7 +199,8 @@ install: all
 	install -m755 $(BUILDDIR)$(LV2NAME_WARPS)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 	install -m755 $(BUILDDIR)$(LV2NAME_PLAITS)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 	install -m755 $(BUILDDIR)$(LV2NAME_GRIDS)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
-	install -m644 $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(BUILDDIR)$(LV2NAME_GRIDS).ttl $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	install -m755 $(BUILDDIR)$(LV2NAME_MARBLES)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	install -m644 $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(BUILDDIR)$(LV2NAME_GRIDS).ttl $(BUILDDIR)$(LV2NAME_MARBLES).ttl $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 
 uninstall:
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/manifest.ttl
@@ -187,6 +212,8 @@ uninstall:
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_PLAITS)$(LIB_EXT)
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_GRIDS).ttl
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_GRIDS)$(LIB_EXT)
+	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_MARBLES).ttl
+	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_MARBLES)$(LIB_EXT)
 	-rmdir $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 
 $(LV2NAME_CLOUDS)debug : clean $(RES_OBJECTS)
