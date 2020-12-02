@@ -97,3 +97,8 @@ warps:meta
 	a lv2:Plugin ;
 	lv2:binary <polymarbles.so> ;
 	rdfs:seeAlso <polymarbles.ttl> .
+
+<http://polyeffects.com/lv2/polyrings>
+	a lv2:Plugin ;
+	lv2:binary <polyrings.so> ;
+	rdfs:seeAlso <polyrings.ttl> .

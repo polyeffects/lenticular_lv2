@@ -181,7 +181,6 @@ typedef enum {
 	Y_SPREAD_PARAM,
 	Y_BIAS_PARAM,
 	Y_STEPS_PARAM,
-
 } PortIndex;
 
 struct Marbles {
