@@ -1,11 +1,11 @@
 #!/usr/bin/make -f
-OPTIMIZATIONS ?= -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer -O3 -fno-finite-math-only -DNDEBUG
-# OPTIMIZATIONS = -msse
+# OPTIMIZATIONS ?= -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer -O3 -fno-finite-math-only -DNDEBUG
+OPTIMIZATIONS = -msse
 # OPTIMIZATIONS ?= -mtune=cortex-a53 -funsafe-math-optimizations -ffast-math -fomit-frame-pointer -O3 -fno-finite-math-only -fvisibility=hidden -fdata-sections -ffunction-sections  -DNDEBUG # -fopt-info-vec-optimize
 PREFIX ?= /usr
 
 DEBUGFLAGS = -D_FORTIFY_SOURCE=2 -O0 -g -Wl,-z,relro,-z,now -fPIC -DPIC -Wall -D DEBUG -D NOSSE
-CFLAGS ?= -fPIC $(OPTIMIZATIONS) #$(DEBUGFLAGS)
+CFLAGS ?= -fPIC $(OPTIMIZATIONS) $(DEBUGFLAGS)
 
 PKG_CONFIG?=pkg-config
 STRIP?=strip

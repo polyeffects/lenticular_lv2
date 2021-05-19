@@ -69,15 +69,32 @@ void Modulator::Init(float sample_rate) {
   previous_parameters_.note = 48.0f;
 
   feedback_sample_ = 0.0f;
+  feedback_sample_frame_ = {0, 0};
   delay_interpolation_ = INTERPOLATION_HERMITE;
 
   ShortFrame e = {0, 0};
   fill(delay_buffer_, delay_buffer_+DELAY_SIZE, e);
 
+
   filter_[0].Init();
   filter_[1].Init();
   filter_[2].Init();
   filter_[3].Init();
+
+  // twist delay
+  write_head_ = 0;
+  write_position_ = 0.0f;
+  previous_samples_[0] = {0.0f, 0.0f};
+  previous_samples_[1] = {0.0f, 0.0f};
+  previous_samples_[2] = {0.0f, 0.0f};
+  twist_lp_time_ = 0.0f;
+  twist_lp_rate_ = 0.0f;
+  // doppler
+  doppler_cursor_ = 0;
+  doppler_lfo_phase_ = 0.0f;
+  doppler_distance_ = 1.0f;
+  doppler_angle_ = 1.0f;
+
 }
 
 void Modulator::ProcessFreqShifter(
@@ -566,14 +583,6 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
 
   ShortFrame *buffer = delay_buffer_;
 
-  static FloatFrame feedback_sample;
-
-  static int32_t write_head = 0;
-
-  static float write_position = 0.0f;
-
-  static FloatFrame previous_samples[3] = {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}};
-
   float time = previous_parameters_.modulation_parameter * (DELAY_SIZE-10) + 5;
   float time_end = parameters_.modulation_parameter * (DELAY_SIZE-10) + 5;
   float time_increment = (time_end - time) / static_cast<float>(size);
@@ -599,14 +608,12 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
 
   while (size--) {
 
-    static float lp_time = 0.0f;
-    ONE_POLE(lp_time, time, 0.00002f);
+    ONE_POLE(twist_lp_time_, time, 0.00002f);
 
-    static float lp_rate;
-    ONE_POLE(lp_rate, rate, 0.007f);
-    float sample_rate = fabsf(lp_rate);
+    ONE_POLE(twist_lp_rate_, rate, 0.007f);
+    float sample_rate = fabsf(twist_lp_rate_);
     CONSTRAIN(sample_rate, 0.001f, 1.0f);
-    int direction = lp_rate > 0.0f ? 1 : -1;
+    int direction = twist_lp_rate_ > 0.0f ? 1 : -1;
 
     FloatFrame in;
     in.l = static_cast<float>(input->l) / 32768.0f;
@@ -616,14 +623,14 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
 
     if (parameters_.carrier_shape == 3) {
       // invert feedback channels (ping-pong)
-      fb.l = feedback_sample.r * feedback * 1.1f;
-      fb.r = feedback_sample.l * feedback * 1.1f;
+      fb.l = feedback_sample_frame_.r * feedback * 1.1f;
+      fb.r = feedback_sample_frame_.l * feedback * 1.1f;
     } else if (parameters_.carrier_shape == 2) {
       // disable simulate tape hiss with a bit of noise
       /* float noise1 = Random::GetFloat(); */
       /* float noise2 = Random::GetFloat(); */
-      fb.l = feedback_sample.l; // + noise1 * 0.002f;
-      fb.r = feedback_sample.r; // + noise2 * 0.002f;
+      fb.l = feedback_sample_frame_.l; // + noise1 * 0.002f;
+      fb.r = feedback_sample_frame_.r; // + noise2 * 0.002f;
       // apply filters: fixed high-pass and varying low-pass with attenuation
       filter_[2].set_f<stmlib::FREQUENCY_FAST>(feedback / 12.0f);
       filter_[3].set_f<stmlib::FREQUENCY_FAST>(feedback / 12.0f);
@@ -639,12 +646,12 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
     } else if (parameters_.carrier_shape == 0) {
       // open feedback loop
       fb.l = feedback * 1.1f * in.r;
-      fb.r = feedback_sample.l;
+      fb.r = feedback_sample_frame_.l;
       in.r = 0.0f;
     } else {
       // classic dual delay
-      fb.l = feedback_sample.l * feedback * 1.1f;
-      fb.r = feedback_sample.r * feedback * 1.1f;
+      fb.l = feedback_sample_frame_.l * feedback * 1.1f;
+      fb.r = feedback_sample_frame_.r * feedback * 1.1f;
     }
 
     // input + feedback
@@ -653,7 +660,7 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
     mix.r = in.r + fb.r;
 
     // write to buffer
-    while (write_position < 1.0f) {
+    while (write_position_ < 1.0f) {
 
       // read somewhere between the input and the previous input
       FloatFrame s = {0, 0};
@@ -662,12 +669,12 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
         s.l = mix.l;
         s.r = mix.r;
       } else if (delay_interpolation_ == INTERPOLATION_LINEAR) {
-        s.l = previous_samples[0].l + (mix.l - previous_samples[0].l) * write_position;
-        s.r = previous_samples[0].r + (mix.r - previous_samples[0].r) * write_position;
+        s.l = previous_samples_[0].l + (mix.l - previous_samples_[0].l) * write_position_;
+        s.r = previous_samples_[0].r + (mix.r - previous_samples_[0].r) * write_position_;
       } else if (delay_interpolation_ == INTERPOLATION_HERMITE) {
-        FloatFrame xm1 = previous_samples[2];
-        FloatFrame x0 = previous_samples[1];
-        FloatFrame x1 = previous_samples[0];
+        FloatFrame xm1 = previous_samples_[2];
+        FloatFrame x0 = previous_samples_[1];
+        FloatFrame x1 = previous_samples_[0];
         FloatFrame x2 = mix;
 
         FloatFrame c = { (x1.l - xm1.l) * 0.5f,
@@ -677,34 +684,34 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
         FloatFrame a = { w.l + v.l + (x2.l - x0.l) * 0.5f,
                          w.r + v.r + (x2.r - x0.r) * 0.5f };
         FloatFrame b_neg = { w.l + a.l, w.r + a.r };
-        float t = write_position;
+        float t = write_position_;
         s.l = ((((a.l * t) - b_neg.l) * t + c.l) * t + x0.l);
         s.r = ((((a.r * t) - b_neg.r) * t + c.r) * t + x0.r);
       }
 
       // write this to buffer
-      buffer[write_head].l = Clip16((s.l) * 32768.0f);
-      buffer[write_head].r = Clip16((s.r) * 32768.0f);
+      buffer[write_head_].l = Clip16((s.l) * 32768.0f);
+      buffer[write_head_].r = Clip16((s.r) * 32768.0f);
 
-      write_position += 1.0f / sample_rate;
+      write_position_ += 1.0f / sample_rate;
 
-      write_head += direction;
+      write_head_ += direction;
       // wraparound
-      if (write_head >= DELAY_SIZE)
-        write_head -= DELAY_SIZE;
-      else if (write_head < 0)
-        write_head += DELAY_SIZE;
+      if (write_head_ >= DELAY_SIZE)
+        write_head_ -= DELAY_SIZE;
+      else if (write_head_ < 0)
+        write_head_ += DELAY_SIZE;
     }
 
-    write_position--;
+    write_position_--;
 
-    previous_samples[2] = previous_samples[1];
-    previous_samples[1] = previous_samples[0];
-    previous_samples[0] = mix;
+    previous_samples_[2] = previous_samples_[1];
+    previous_samples_[1] = previous_samples_[0];
+    previous_samples_[0] = mix;
 
     // read from buffer
 
-    float index = write_head - write_position * sample_rate * direction - lp_time;
+    float index = write_head_ - write_position_ * sample_rate * direction - twist_lp_time_;
 
     while (index < 0) {
       index += DELAY_SIZE;
@@ -712,7 +719,7 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
 
     MAKE_INTEGRAL_FRACTIONAL(index);
 
-    ShortFrame xm1 = buffer[index_integral];
+    ShortFrame xm1 = buffer[index_integral % DELAY_SIZE];
     ShortFrame x0 = buffer[(index_integral + 1) % DELAY_SIZE];
     ShortFrame x1 = buffer[(index_integral + 2) % DELAY_SIZE];
     ShortFrame x2 = buffer[(index_integral + 3) % DELAY_SIZE];
@@ -748,7 +755,7 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
     wet.l *= gain * gain;
     wet.r *= gain * gain;
 
-    feedback_sample = wet;
+    feedback_sample_frame_ = wet;
 
     float fade_in = Interpolate(lut_xfade_in, drywet, 256.0f);
     float fade_out = Interpolate(lut_xfade_out, drywet, 256.0f);
@@ -782,11 +789,6 @@ void Modulator::ProcessDelay(ShortFrame* input, ShortFrame* output, size_t size)
 void Modulator::ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t size) {
   ShortFrame *buffer = delay_buffer_;
 
-  static size_t cursor = 0;
-  static float lfo_phase = 0.0f;
-  static float distance = 1.0f;
-  static float angle = 1.0f;
-
   float x = previous_parameters_.raw_algorithm * 2.0f - 1.0f;
   float x_end = parameters_.raw_algorithm * 2.0f - 1.0f;
 
@@ -819,12 +821,12 @@ void Modulator::ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t siz
   while (size--) {
 
     // write input to buffer
-    buffer[cursor].l = input->l;
-    buffer[cursor].r = input->r;
+    buffer[doppler_cursor_].l = input->l;
+    buffer[doppler_cursor_].r = input->r;
 
     // LFOs
-    float sin = Interpolate(lut_sin, lfo_phase, 1024.0f);
-    float cos = Interpolate(lut_sin + 256, lfo_phase, 1024.0f);
+    float sin = Interpolate(lut_sin, doppler_lfo_phase_, 1024.0f);
+    float cos = Interpolate(lut_sin + 256, doppler_lfo_phase_, 1024.0f);
 
     float x_lfo = x + sin * lfo_amplitude + 0.05f; // offset avoids discontinuity at 0
     float y_lfo = y + cos  * lfo_amplitude;
@@ -836,21 +838,21 @@ void Modulator::ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t siz
     float an = Interpolate(lut_arcsin, (x_lfo/di + 1.0f) * 0.5f, 256.0f);
     di /= 2.237;		// sqrt(5)
 
-    ONE_POLE(distance, di, 0.001f);
-    ONE_POLE(angle, an, 0.001f);
+    ONE_POLE(doppler_distance_, di, 0.001f);
+    ONE_POLE(doppler_angle_, an, 0.001f);
 
     // compute binaural delay
-    float binaural_delay = angle * (48000.0f * 0.0015f); // -1.5ms..1.5ms
-    float delay_l = distance * room_size + (angle > 0 ? binaural_delay : 0);
-    float delay_r = distance * room_size + (angle < 0 ? -binaural_delay : 0);
+    float binaural_delay = doppler_angle_ * (48000.0f * 0.0015f); // -1.5ms..1.5ms
+    float delay_l = doppler_distance_ * room_size + (doppler_angle_ > 0 ? binaural_delay : 0);
+    float delay_r = doppler_distance_ * room_size + (doppler_angle_ < 0 ? -binaural_delay : 0);
 
     // linear delay interpolation
     MAKE_INTEGRAL_FRACTIONAL(delay_l);
     MAKE_INTEGRAL_FRACTIONAL(delay_r);
 
-    int16_t index_l = cursor - delay_l_integral;
+    int16_t index_l = doppler_cursor_ - delay_l_integral;
     if (index_l < 0) index_l += DELAY_SIZE;
-    int16_t index_r = cursor - delay_r_integral;
+    int16_t index_r = doppler_cursor_ - delay_r_integral;
     if (index_r < 0) index_r += DELAY_SIZE;
 
     ShortFrame a_l = buffer[index_l];
@@ -863,26 +865,26 @@ void Modulator::ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t siz
     short s1_r = a_r.l + (b_r.l - a_r.l) * delay_r_fractional;
     short s2_r = a_r.r + (b_r.r - a_r.r) * delay_r_fractional;
 
-    // distance attenuation
-    float atten = 1.0f + atten_factor * distance * distance;
+    // doppler_distance_ attenuation
+    float atten = 1.0f + atten_factor * doppler_distance_ * doppler_distance_;
     s1_l /= atten;
     s2_l /= atten;
     s1_r /= atten;
     s2_r /= atten;
 
-    float fade_in = Interpolate(lut_xfade_in, (angle + 1.0f) / 2.0f, 256.0f);
-    float fade_out = Interpolate(lut_xfade_out, (angle + 1.0f) / 2.0f, 256.0f);
+    float fade_in = Interpolate(lut_xfade_in, (doppler_angle_ + 1.0f) / 2.0f, 256.0f);
+    float fade_out = Interpolate(lut_xfade_out, (doppler_angle_ + 1.0f) / 2.0f, 256.0f);
 
     output->l = s2_l * fade_in + s1_l * fade_out;
     output->r = s1_r * fade_in + s2_r * fade_out;
 
     x += x_increment;
     y += y_increment;
-    lfo_phase += lfo_freq / 48000.0f;
-    if (lfo_phase > 1.0f) lfo_phase--;
+    doppler_lfo_phase_ += lfo_freq / 48000.0f;
+    if (doppler_lfo_phase_ > 1.0f) doppler_lfo_phase_--;
     input++;
     output++;
-    cursor = (cursor + 1) % DELAY_SIZE;
+    doppler_cursor_ = (doppler_cursor_ + 1) % DELAY_SIZE;
   }
 
   previous_parameters_ = parameters_;

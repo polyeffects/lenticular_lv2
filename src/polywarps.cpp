@@ -68,7 +68,7 @@ typedef struct {
     float* modulator_output;
     float* aux_output;
 
-	warps::Modulator modulator;
+	warps::Modulator *modulator;
 
 	float algorithm_smooth = 0.5f;
     float timbre_smooth = 0.5f;
@@ -84,29 +84,29 @@ instantiate(const LV2_Descriptor*     descriptor,
             const LV2_Feature* const* features)
 {
 	Warps* amp = new Warps();
-
-	memset(&amp->modulator, 0, sizeof(amp->modulator));
-    amp->modulator.Init(48000.0f);
+    amp->modulator = new warps::Modulator();
+	memset(amp->modulator, 0, sizeof(*amp->modulator));
+    amp->modulator->Init(48000.0f);
 
 	// set feature mode for the difference modules.
 	if (!strcmp (descriptor->URI, WARPS_URI "doppler")) {
-		amp->modulator.set_feature_mode(warps::FEATURE_MODE_DOPPLER);
+		amp->modulator->set_feature_mode(warps::FEATURE_MODE_DOPPLER);
 	} else if (!strcmp (descriptor->URI, WARPS_URI "fold")) {
-		amp->modulator.set_feature_mode(warps::FEATURE_MODE_FOLD);
+		amp->modulator->set_feature_mode(warps::FEATURE_MODE_FOLD);
 	} else if (!strcmp (descriptor->URI, WARPS_URI "chebyschev")) {
-		amp->modulator.set_feature_mode(warps::FEATURE_MODE_CHEBYSCHEV);
+		amp->modulator->set_feature_mode(warps::FEATURE_MODE_CHEBYSCHEV);
 	} else if (!strcmp (descriptor->URI, WARPS_URI "frequency_shifter")) {
-		amp->modulator.set_feature_mode(warps::FEATURE_MODE_FREQUENCY_SHIFTER);
+		amp->modulator->set_feature_mode(warps::FEATURE_MODE_FREQUENCY_SHIFTER);
 	} else if (!strcmp (descriptor->URI, WARPS_URI "bitcrusher")) {
-		amp->modulator.set_feature_mode(warps::FEATURE_MODE_BITCRUSHER);
+		amp->modulator->set_feature_mode(warps::FEATURE_MODE_BITCRUSHER);
 	} else if (!strcmp (descriptor->URI, WARPS_URI "comparator")) {
-		amp->modulator.set_feature_mode(warps::FEATURE_MODE_COMPARATOR);
+		amp->modulator->set_feature_mode(warps::FEATURE_MODE_COMPARATOR);
 	} else if (!strcmp (descriptor->URI, WARPS_URI "vocoder")) {
-		amp->modulator.set_feature_mode(warps::FEATURE_MODE_VOCODER);
+		amp->modulator->set_feature_mode(warps::FEATURE_MODE_VOCODER);
 	} else if (!strcmp (descriptor->URI, WARPS_URI "delay")) {
-		amp->modulator.set_feature_mode(warps::FEATURE_MODE_DELAY);
+		amp->modulator->set_feature_mode(warps::FEATURE_MODE_DELAY);
 	} else if (!strcmp (descriptor->URI, WARPS_URI "meta")) {
-		amp->modulator.set_feature_mode(warps::FEATURE_MODE_META);
+		amp->modulator->set_feature_mode(warps::FEATURE_MODE_META);
 	}
 
 	return (LV2_Handle)amp;
@@ -203,7 +203,7 @@ run(LV2_Handle instance, uint32_t n_samples)
     float* modulator_output = amp->modulator_output;
     float* aux_output = amp->aux_output;
 
-	warps::Modulator *modulator = &(amp->modulator);
+	warps::Modulator *modulator = amp->modulator;
 
 	uint32_t block_size = 32;
 	if (n_samples < block_size){
@@ -233,8 +233,8 @@ run(LV2_Handle instance, uint32_t n_samples)
         p->modulation_algorithm = clamp(amp->algorithm_smooth / 8.0f + algorithm_input[j], 0.0f, 1.0f);
         p->modulation_parameter = clamp(amp->timbre_smooth + timbre_input[j], 0.0f, 1.0f);
 
-		p->raw_level[0] = clamp(amp->level1_smooth, 0.0f, 1.0f);
-		p->raw_level[1] = clamp(amp->level2_smooth, 0.0f, 1.0f);
+		p->raw_level[0] = clamp(amp->level1_smooth + level1_input[j], 0.0f, 1.0f);
+		p->raw_level[1] = clamp(amp->level2_smooth + level2_input[j], 0.0f, 1.0f);
 
 		p->raw_algorithm_pot = amp->algorithm_smooth / 8.0;
         p->raw_algorithm_cv  = clamp(algorithm_input[j], -1.0f, 1.0f);
@@ -283,7 +283,7 @@ static void
 cleanup(LV2_Handle instance)
 {
 	Warps* amp = (Warps*)instance;
-	/* delete amp->modulator; */
+	delete amp->modulator;
 	delete amp;
 }
 

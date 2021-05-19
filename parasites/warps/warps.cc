@@ -88,13 +88,13 @@ void Init() {
   version.Init();
 
   // Init modulator.
-  modulator.Init(96000.0f);
+  modulator.Init(48000.0f);
   settings.Init();
   cv_scaler.Init(settings.mutable_calibration_data());
   
   ui.Init(&settings, &cv_scaler, &modulator);
   
-  if (!codec.Init(!version.revised(), 96000)) {
+  if (!codec.Init(!version.revised(), 48000)) {
     ui.Panic();
   }
   if (!codec.Start(60, &FillBuffer)) {

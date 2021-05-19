@@ -319,6 +319,20 @@ class Modulator {
   float buffer_[3][kMaxBlockSize];
   float src_buffer_[2][kMaxBlockSize * kOversampling];
   float feedback_sample_;
+  // delay stuff, ported from statics
+  FloatFrame feedback_sample_frame_;
+  int32_t write_head_;
+  float write_position_;
+  FloatFrame previous_samples_[3];
+  float twist_lp_time_;
+  float twist_lp_rate_;
+  // doppler
+  size_t doppler_cursor_;
+  float doppler_lfo_phase_;
+  float doppler_distance_;
+  float doppler_angle_;
+
+
 
   enum DelaySize {
     DELAY_SIZE = (sizeof(delay_buffer_)

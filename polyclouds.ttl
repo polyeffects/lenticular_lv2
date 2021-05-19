@@ -268,7 +268,7 @@ clouds:stretch
 			lv2:CVPort ;
 		lv2:index 0 ;
 		lv2:symbol "freeze" ;
-		lv2:name "Loop" ;
+		lv2:name "Freeze" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
