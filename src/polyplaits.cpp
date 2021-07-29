@@ -283,7 +283,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		// Construct modulations
 		plaits::Modulations modulations;
 		modulations.engine = engine_input[s];
-		modulations.note = note_input[s] * 60.0f // 0-1 5 v * 12.f;
+		modulations.note = note_input[s] * 60.0f; // 0-1 5 v * 12.f;
 		modulations.harmonics = harmonics_input[s];
 		// Triggers at around 0.7 V
 		if (trigger_patched) {
