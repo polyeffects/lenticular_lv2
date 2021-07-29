@@ -22,6 +22,7 @@ LV2NAME_PLAITS=polyplaits
 LV2NAME_GRIDS=polygrids
 LV2NAME_MARBLES=polymarbles
 LV2NAME_RINGS=polyrings
+LV2NAME_TIDES=polytides
 BUNDLE=polylenticular.lv2
 BUILDDIR=build/
 targets=
@@ -55,6 +56,7 @@ targets+=$(BUILDDIR)$(LV2NAME_PLAITS)$(LIB_EXT)
 targets+=$(BUILDDIR)$(LV2NAME_GRIDS)$(LIB_EXT)
 targets+=$(BUILDDIR)$(LV2NAME_MARBLES)$(LIB_EXT)
 targets+=$(BUILDDIR)$(LV2NAME_RINGS)$(LIB_EXT)
+targets+=$(BUILDDIR)$(LV2NAME_TIDES)$(LIB_EXT)
 
 ###############################################################################
 # extract versions
@@ -127,6 +129,12 @@ RINGS_SOURCES += eurorack/stmlib/utils/random.cc
 RINGS_SOURCES += eurorack/stmlib/dsp/atan.cc
 RINGS_SOURCES += eurorack/stmlib/dsp/units.cc
 
+TIDES_SOURCES = src/polytides.cpp 
+TIDES_SOURCES += eurorack/tides2/poly_slope_generator.cc
+TIDES_SOURCES += eurorack/tides2/ramp_extractor.cc
+TIDES_SOURCES += eurorack/tides2/resources.cc
+TIDES_SOURCES += eurorack/stmlib/dsp/units.cc
+
 FLAGS += \
 	-DTEST \
 	-DPARASITES \
@@ -144,7 +152,7 @@ override CFLAGS += `$(PKG_CONFIG) --cflags lv2`
 # build target definitions
 default: all
 
-all: $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(BUILDDIR)$(LV2NAME_GRIDS).ttl $(BUILDDIR)$(LV2NAME_MARBLES).ttl $(BUILDDIR)$(LV2NAME_RINGS).ttl $(targets)
+all: $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(BUILDDIR)$(LV2NAME_GRIDS).ttl $(BUILDDIR)$(LV2NAME_MARBLES).ttl $(BUILDDIR)$(LV2NAME_RINGS).ttl $(BUILDDIR)$(LV2NAME_TIDES).ttl $(targets)
 
 lv2syms:
 	echo "_lv2_descriptor" > lv2syms
@@ -176,6 +184,10 @@ $(BUILDDIR)$(LV2NAME_MARBLES).ttl: $(LV2NAME_MARBLES).ttl
 $(BUILDDIR)$(LV2NAME_RINGS).ttl: $(LV2NAME_RINGS).ttl
 	@mkdir -p $(BUILDDIR)
 	cat $(LV2NAME_RINGS).ttl > $(BUILDDIR)$(LV2NAME_RINGS).ttl
+	""
+$(BUILDDIR)$(LV2NAME_TIDES).ttl: $(LV2NAME_TIDES).ttl
+	@mkdir -p $(BUILDDIR)
+	cat $(LV2NAME_TIDES).ttl > $(BUILDDIR)$(LV2NAME_TIDES).ttl
 
 $(BUILDDIR)$(LV2NAME_CLOUDS)$(LIB_EXT): $(CLOUDS_SOURCES) 
 	@mkdir -p $(BUILDDIR)
@@ -214,6 +226,12 @@ $(BUILDDIR)$(LV2NAME_RINGS)$(LIB_EXT): $(RINGS_SOURCES)
 	  -o $(BUILDDIR)$(LV2NAME_RINGS)$(LIB_EXT) $(RINGS_SOURCES) \
 		-shared $(LV2LDFLAGS) $(LDFLAGS) $(LOADLIBES)
 
+$(BUILDDIR)$(LV2NAME_TIDES)$(LIB_EXT): $(TIDES_SOURCES) 
+	@mkdir -p $(BUILDDIR)
+	$(CXX) $(CPPFLAGS) $(CFLAGS) $(MUT_FLAGS) -fPIC \
+	  -o $(BUILDDIR)$(LV2NAME_TIDES)$(LIB_EXT) $(TIDES_SOURCES) \
+		-shared $(LV2LDFLAGS) $(LDFLAGS) $(LOADLIBES)
+
 # install/uninstall/clean target definitions
 
 install: all
@@ -224,7 +242,8 @@ install: all
 	install -m755 $(BUILDDIR)$(LV2NAME_GRIDS)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 	install -m755 $(BUILDDIR)$(LV2NAME_MARBLES)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 	install -m755 $(BUILDDIR)$(LV2NAME_RINGS)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
-	install -m644 $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(BUILDDIR)$(LV2NAME_GRIDS).ttl $(BUILDDIR)$(LV2NAME_MARBLES).ttl $(BUILDDIR)$(LV2NAME_RINGS).ttl $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	install -m755 $(BUILDDIR)$(LV2NAME_TIDES)$(LIB_EXT) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	install -m644 $(BUILDDIR)manifest.ttl $(BUILDDIR)$(LV2NAME_CLOUDS).ttl $(BUILDDIR)$(LV2NAME_WARPS).ttl $(BUILDDIR)$(LV2NAME_PLAITS).ttl $(BUILDDIR)$(LV2NAME_GRIDS).ttl $(BUILDDIR)$(LV2NAME_MARBLES).ttl $(BUILDDIR)$(LV2NAME_RINGS).ttl $(BUILDDIR)$(LV2NAME_TIDES).ttl $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 
 uninstall:
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/manifest.ttl
@@ -240,6 +259,8 @@ uninstall:
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_MARBLES)$(LIB_EXT)
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_RINGS).ttl
 	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_RINGS)$(LIB_EXT)
+	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_TIDES).ttl
+	rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(LV2NAME_TIDES)$(LIB_EXT)
 	-rmdir $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 
 $(LV2NAME_CLOUDS)debug : clean $(RES_OBJECTS)
