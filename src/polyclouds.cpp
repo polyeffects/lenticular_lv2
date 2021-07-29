@@ -365,7 +365,7 @@ run(LV2_Handle instance, uint32_t n_samples)
         amp->size_smooth += .008f * (size_param - amp->size_smooth);
 		p->size = clamp(amp->size_smooth + size[j], 0.0f, 1.0f);
         amp->pitch_smooth += .008f * (pitch_param - amp->pitch_smooth);
-		p->pitch = clamp(amp->pitch_smooth + (pitch[j] * 12.0f), -48.0f, 48.0f);
+		p->pitch = clamp(amp->pitch_smooth + (pitch[j] * 60.0f), -48.0f, 48.0f);
         amp->density_smooth += .008f * (density_param - amp->density_smooth);
 		p->density = clamp(amp->density_smooth + density[j], 0.0f, 1.0f);
         amp->texture_smooth += .008f * (texture_param - amp->texture_smooth);

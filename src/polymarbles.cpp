@@ -642,20 +642,10 @@ run(LV2_Handle instance, uint32_t n_samples)
 			t2_output[i] = (amp->ramp_master[blockIndex] < 0.5f) ? 1.f : 0.f;
 			t3_output[i] = amp->gates[blockIndex * 2 + 1] ? 1.f : 0.f;
 			
-			if (x_range == 0){
-				x1_output[i] = voltages[blockIndex * 4 + 0];  
-				x2_output[i] = voltages[blockIndex * 4 + 1];
-				x3_output[i] = voltages[blockIndex * 4 + 2];
-				y_output[i] = voltages[blockIndex * 4 + 3];
-			}
-			else
-			{
-				x1_output[i] = voltages[blockIndex * 4 + 0] / 5.0f; 
-				x2_output[i] = voltages[blockIndex * 4 + 1] / 5.0f;
-				x3_output[i] = voltages[blockIndex * 4 + 2] / 5.0f;
-				y_output[i] = voltages[blockIndex * 4 + 3] / 5.0f;
-			
-			}
+            x1_output[i] = voltages[blockIndex * 4 + 0] / 5.0f; 
+            x2_output[i] = voltages[blockIndex * 4 + 1] / 5.0f;
+            x3_output[i] = voltages[blockIndex * 4 + 2] / 5.0f;
+            y_output[i] = voltages[blockIndex * 4 + 3] / 5.0f;
 		}
 
 		pos = pos + block_size;

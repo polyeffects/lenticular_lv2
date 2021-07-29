@@ -294,7 +294,7 @@ run(LV2_Handle instance, uint32_t n_samples)
         // Performance
         rings::PerformanceState performance_state; 
 		if  (pitch_input[s] > -40.0f){
-            performance_state.note = 12.0 * pitch_input[s];
+            performance_state.note = 60.0 * pitch_input[s];
         } else {
             performance_state.note = 1 / 12.0;
         }
