@@ -123,6 +123,8 @@ typedef struct {
     int running = 0;
     bool extClock = false;
     long elapsedTicks = 0;
+	bool prev_clock = false;
+	bool prev_reset = false;
 
     float tempo = 120.0f;
 
@@ -140,7 +142,7 @@ typedef struct {
     SequencerMode sequencerMode = HENRI;
     int inEuclideanMode = 0;
 
-    TriggerOutputMode triggerOutputMode = GATE;
+    TriggerOutputMode triggerOutputMode = PULSE;
 
     enum AccOutputMode {
         INDIVIDUAL_ACCENTS,
@@ -153,7 +155,7 @@ typedef struct {
         EXTCLOCK_RES_8_PPQN,
         EXTCLOCK_RES_24_PPQN,
     };
-    ExtClockResolution extClockResolution = EXTCLOCK_RES_24_PPQN;
+    ExtClockResolution extClockResolution = EXTCLOCK_RES_4_PPQN;
 
     enum ChaosKnobMode {
         CHAOS,
@@ -297,6 +299,11 @@ connect_port(LV2_Handle instance,
 static void
 activate(LV2_Handle instance)
 {
+	Grids* plugin = (Grids*)instance;
+
+	plugin->prev_clock = false;
+	plugin->prev_reset = false;
+
 }
 
 /**
@@ -424,8 +431,14 @@ run(LV2_Handle instance, uint32_t n_samples)
 
 		if(amp->running) {
 			if(amp->extClock) {
-				if(clock_input[j] >= 1.0f) {
-					advStep = true;
+
+				if (clock_input[j] >= 0.4) { // 2 volt in Hector
+					if (!(amp->prev_clock)){
+						amp->prev_clock = true;
+						advStep = true;
+					}
+				} else if (clock_input[j] <= 0.05){ // 0.25 volts in Hector
+					amp->prev_clock = false;
 				}
 			}
 			else if(amp->metro->hasTicked()){
@@ -471,13 +484,14 @@ run(LV2_Handle instance, uint32_t n_samples)
 				}
 			}
 		}
+		// need to schmitt filter these too? This appear to be to find the edge exactly... 
 		else if(amp->extClock && amp->triggerOutputMode == GATE) {
 			for(int i = 0; i < 6; ++i) {
-				if(clock_input[j] > 0 && amp->gateState[i]) {
+				if(clock_input[j] > 0.4 && amp->gateState[i]) {
 					amp->gateState[i] = false;
 					outIDs[i][j] = 1.0f;
 				}
-				if(clock_input[j] <= 0) {
+				if(clock_input[j] <= 0.05) {
 					outIDs[i][j] = 0.0f;
 				}
 			}

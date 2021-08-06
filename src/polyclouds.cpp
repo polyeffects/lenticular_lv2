@@ -319,6 +319,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 	clouds::GranularProcessor *processor = amp->processor;
 
 	// Trigger Do i need to persist? 
+	// Schmitt trigger here? 
 	bool triggered = false;
 	uint32_t block_size = 32;
 	if (n_samples < block_size){
@@ -327,7 +328,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 	uint32_t pos = 0;
 	while (pos < n_samples){
 		triggered = false;
-		if (trig[pos] >= 1) {
+		if (trig[pos] >= 0.4) {
 			if (!(amp->prev_trigger)){
 				triggered = true;
 				amp->prev_trigger = true;
@@ -357,8 +358,8 @@ run(LV2_Handle instance, uint32_t n_samples)
 		clouds::Parameters* p = processor->mutable_parameters();
 		p->trigger = triggered;
 		p->gate = triggered;
-		p->freeze = (freeze[j] >= 1.0 || freeze_param >= 1.0f);
-		p->granular.reverse = (reverse_param >= 1.0f || reverse[j] >= 1.0f);
+		p->freeze = (freeze[j] >= 0.4 || freeze_param >= 1.0f);
+		p->granular.reverse = (reverse_param >= 1.0f || reverse[j] >= 0.4f);
 
         amp->position_smooth += .008f * (position_param - amp->position_smooth);
 		p->position = clamp(amp->position_smooth + position[j], 0.0f, 1.0f);

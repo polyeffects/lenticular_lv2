@@ -522,11 +522,11 @@ run(LV2_Handle instance, uint32_t n_samples)
 
 		for (int blockIndex = 0; blockIndex < block_size; blockIndex++){
 			// Clocks
-			bool t_gate = t_clock_input[pos+blockIndex] >= 1.0f;  
+			bool t_gate = t_clock_input[pos+blockIndex] >= 0.17f;  
 			amp->last_t_clock = stmlib::ExtractGateFlags(amp->last_t_clock, t_gate);
 			amp->t_clocks[blockIndex] = amp->last_t_clock;
 
-			bool x_gate = x_clock_input[pos+blockIndex] >= 1.0f; 
+			bool x_gate = x_clock_input[pos+blockIndex] >= 0.17f; 
 			amp->last_xy_clock = stmlib::ExtractGateFlags(amp->last_xy_clock, x_gate);
 			amp->xy_clocks[blockIndex] = amp->last_xy_clock;
 		}

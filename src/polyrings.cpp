@@ -242,7 +242,12 @@ run(LV2_Handle instance, uint32_t n_samples)
 	rings::ResonatorModel resonatorModel = rings::RESONATOR_MODEL_MODAL;
 
     polyphonyMode = (int) (polyphony_param) % 3;
-    resonatorModel = (rings::ResonatorModel)((int) (resonator_param) % 3);
+    resonatorModel = (rings::ResonatorModel)((int) (resonator_param) % 6);
+    if (resonator_param > 5.5){
+        amp->easterEgg = true;
+    } else {
+        amp->easterEgg = false;
+    }
 
 	uint32_t block_size = 24;
 	if (n_samples < block_size){
@@ -265,7 +270,7 @@ run(LV2_Handle instance, uint32_t n_samples)
         bool sub_strum = false;
 		for (uint32_t i = 0; i < block_size; i++) {
             in[i] = clamp(in_input[s+i], 0.0f, 1.0f);
-            if (strum_input[s+i] >= 1.0){
+            if (strum_input[s+i] >= 0.4){
                 sub_strum = true;
             
             }

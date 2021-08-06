@@ -79,6 +79,7 @@ typedef enum {
 		OUT2,
 		OUT3,
 		OUT4,
+		TEMPO_OUT,
 } PortIndex;
 
 struct Tides {
@@ -129,6 +130,7 @@ struct Tides {
 	float* out2;
 	float* out3;
 	float* out4;
+	float* tempo_out;
 
 	Tides(double rate) {
 		/* configParam(RANGE_PARAM, 0.0, 1.0, 0.0, "Frequency range"); */
@@ -249,6 +251,9 @@ connect_port(LV2_Handle instance,
 		case OUT4:
 			amp->out4 = (float*)data;
 			break;
+		case TEMPO_OUT:
+			amp->tempo_out = (float*)data;
+			break;
 		default:
 			break;
 	}
@@ -291,6 +296,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 	float* out2 = amp->out2;
 	float* out3 = amp->out3;
 	float* out4 = amp->out4;
+	float* tempo_out = amp->tempo_out;
 
 	const bool trig_is_connected = trig_input[0] > -40.0f;
 	const bool clock_is_connected = clock_input[0] > -40.0f;
@@ -310,6 +316,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 	tides::PolySlopeGenerator::OutputSample out[tides::kBlockSize] = {};
 
 	uint32_t pos = 0;
+	float frequency;
 	while (pos < n_samples){
 		uint32_t s = pos;
 		// Input gates
@@ -325,7 +332,6 @@ run(LV2_Handle instance, uint32_t n_samples)
 		float transposition = note + fm;
 
 		float ramp[block_size];
-		float frequency;
 
 		if (clock_is_connected) {
 			if (amp->must_reset_ramp_extractor) {
@@ -387,6 +393,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 			block_size = n_samples - pos;
 		}
 	}
+	tempo_out[0] = frequency * amp->sample_rate * 15; // 60 / 4 ;
 }
 
 /**
