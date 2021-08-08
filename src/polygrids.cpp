@@ -389,7 +389,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		}
 
 		// Clock, tempo and swing
-		float tempo = clamp(tempo_param, 37.f, 240.f);
+		float tempo = clamp(tempo_param, 38.f, 240.f);
 		swing = clamp(swing_param + swing_cv[j], 0.f, 0.9f);
 		swingHighTempo = tempo / (1 - swing);
 		swingLowTempo = tempo / (1 + swing);
@@ -401,7 +401,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		}
 
 		// External clock select
-		if(tempo_param < 38.0) {
+		if (clock_input[j] > -40.0f){
 			if(amp->initExtReset) {
 				amp->grids->reset();
 				amp->initExtReset = false;
