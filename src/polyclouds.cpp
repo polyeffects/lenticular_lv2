@@ -318,6 +318,18 @@ run(LV2_Handle instance, uint32_t n_samples)
 	//
 	clouds::GranularProcessor *processor = amp->processor;
 
+	float in_gain_smooth = amp->in_gain_smooth;
+	float position_smooth = amp->position_smooth;
+    float size_smooth = amp->size_smooth;
+    float pitch_smooth = amp->pitch_smooth;
+    float density_smooth = amp->density_smooth;
+    float texture_smooth = amp->texture_smooth;
+    float blend_smooth = amp->blend_smooth;
+    float spread_smooth = amp->spread_smooth;
+    float feedback_smooth = amp->feedback_smooth;
+    float reverb_smooth = amp->reverb_smooth;
+
+
 	// Trigger Do i need to persist? 
 	// Schmitt trigger here? 
 	bool triggered = false;
@@ -326,6 +338,10 @@ run(LV2_Handle instance, uint32_t n_samples)
 		block_size = n_samples;	
 	}
 	uint32_t pos = 0;
+	processor->set_num_channels(2);
+	processor->set_low_fidelity(false);
+	processor->Prepare();
+
 	while (pos < n_samples){
 		triggered = false;
 		if (trig[pos] >= 0.4) {
@@ -337,9 +353,9 @@ run(LV2_Handle instance, uint32_t n_samples)
 			amp->prev_trigger = false;
 		}
 
+		/* amp->in_gain_smooth += .008f * (in_gain_param - amp->in_gain_smooth); */
 		clouds::ShortFrame input[block_size];
 		for (uint32_t i = 0; i < block_size; i++) {
-			amp->in_gain_smooth += .008f * (in_gain_param - amp->in_gain_smooth);
 			/* input[i].l = clamp(in_l[pos+i] * amp->in_gain_smooth * 32767.0f, -32768.0f, 32767.0f); */
 			/* input[i].r = clamp(in_r[pos+i] * amp->in_gain_smooth * 32767.0f, -32768.0f, 32767.0f); */
 			input[i].l = clamp(in_l[pos+i] * 32767.0f, -32768.0f, 32767.0f);
@@ -348,9 +364,6 @@ run(LV2_Handle instance, uint32_t n_samples)
 		// Set up processor
 		/* processor->set_num_channels(amp->mono ? 1 : 2); */
 		/* processor->set_low_fidelity(amp->lofi); */
-		processor->set_num_channels(2);
-		processor->set_low_fidelity(false);
-		processor->Prepare();
 
 		uint32_t j = pos;
 
@@ -361,24 +374,24 @@ run(LV2_Handle instance, uint32_t n_samples)
 		p->freeze = (freeze[j] >= 0.4 || freeze_param >= 1.0f);
 		p->granular.reverse = (reverse_param >= 1.0f || reverse[j] >= 0.4f);
 
-        amp->position_smooth += .008f * (position_param - amp->position_smooth);
-		p->position = clamp(amp->position_smooth + position[j], 0.0f, 1.0f);
-        amp->size_smooth += .008f * (size_param - amp->size_smooth);
-		p->size = clamp(amp->size_smooth + size[j], 0.0f, 1.0f);
-        amp->pitch_smooth += .008f * (pitch_param - amp->pitch_smooth);
-		p->pitch = clamp(amp->pitch_smooth + (pitch[j] * 60.0f), -48.0f, 48.0f);
-        amp->density_smooth += .008f * (density_param - amp->density_smooth);
-		p->density = clamp(amp->density_smooth + density[j], 0.0f, 1.0f);
-        amp->texture_smooth += .008f * (texture_param - amp->texture_smooth);
-		p->texture = clamp(amp->texture_smooth + texture[j], 0.0f, 1.0f);
-        amp->blend_smooth += .008f * (blend_param - amp->blend_smooth);
-		p->dry_wet = clamp(amp->blend_smooth + blend[j], 0.0f, 1.0f);
-        amp->spread_smooth += .008f * (spread_param - amp->spread_smooth);
-		p->stereo_spread =  clamp(amp->spread_smooth + spread[j], 0.0f, 1.0f);
-        amp->feedback_smooth += .008f * (feedback_param - amp->feedback_smooth);
-		p->feedback =  clamp(amp->feedback_smooth + feedback[j], 0.0f, 1.0f);
-        amp->reverb_smooth += .008f * (reverb_param - amp->reverb_smooth);
-		p->reverb =  clamp(amp->reverb_smooth + reverb[j], 0.0f, 1.0f);
+        position_smooth += .008f * (position_param - position_smooth);
+		p->position = clamp(position_smooth + position[j], 0.0f, 1.0f);
+        size_smooth += .008f * (size_param - size_smooth);
+		p->size = clamp(size_smooth + size[j], 0.0f, 1.0f);
+        pitch_smooth += .008f * (pitch_param - pitch_smooth);
+		p->pitch = clamp(pitch_smooth + (pitch[j] * 60.0f), -48.0f, 48.0f);
+        density_smooth += .008f * (density_param - density_smooth);
+		p->density = clamp(density_smooth + density[j], 0.0f, 1.0f);
+        texture_smooth += .008f * (texture_param - texture_smooth);
+		p->texture = clamp(texture_smooth + texture[j], 0.0f, 1.0f);
+        blend_smooth += .008f * (blend_param - blend_smooth);
+		p->dry_wet = clamp(blend_smooth + blend[j], 0.0f, 1.0f);
+        spread_smooth += .008f * (spread_param - spread_smooth);
+		p->stereo_spread =  clamp(spread_smooth + spread[j], 0.0f, 1.0f);
+        feedback_smooth += .008f * (feedback_param - feedback_smooth);
+		p->feedback =  clamp(feedback_smooth + feedback[j], 0.0f, 1.0f);
+        reverb_smooth += .008f * (reverb_param - reverb_smooth);
+		p->reverb =  clamp(reverb_smooth + reverb[j], 0.0f, 1.0f);
 
 		clouds::ShortFrame output[block_size];
 		processor->Process(input, output, block_size);
@@ -392,6 +405,17 @@ run(LV2_Handle instance, uint32_t n_samples)
 			block_size = n_samples - pos;
 		}
 	}
+
+	amp->in_gain_smooth = in_gain_smooth;
+	amp->position_smooth = position_smooth;
+    amp->size_smooth = size_smooth;
+    amp->pitch_smooth = pitch_smooth;
+    amp->density_smooth = density_smooth;
+    amp->texture_smooth = texture_smooth;
+    amp->blend_smooth = blend_smooth;
+    amp->spread_smooth = spread_smooth;
+    amp->feedback_smooth = feedback_smooth;
+    amp->reverb_smooth = reverb_smooth;
 
 }
 

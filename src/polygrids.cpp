@@ -369,7 +369,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 
 
 		if(amp->runMode == TOGGLE) {
-			if (run_button_param > 1 || run_input[j] > 1) {
+			if (run_button_param > 1 || run_input[j] > 0.4) {
 				if(amp->runMode == TOGGLE){
 					amp->running = !amp->running;
 				}
@@ -377,12 +377,12 @@ run(LV2_Handle instance, uint32_t n_samples)
 		}
 		else {
 			amp->running = run_button_param + run_input[j]; 
-			if(amp->running <= 0) {
+			if(amp->running <= 0.05) {
 				amp->metro->reset();
 			}
 		}
 
-		if(reset_button_param || reset_input[j]) {
+		if(reset_button_param || reset_input[j] > 0.4) {
 			amp->grids->reset();
 			amp->metro->reset();
 			amp->elapsedTicks = 0;

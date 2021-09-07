@@ -1,11 +1,15 @@
 #!/usr/bin/make -f
-OPTIMIZATIONS ?= -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer -O3 -fno-finite-math-only -DNDEBUG
+OPTIMIZATIONS ?= -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer -O3 -fno-finite-math-only -DNDEBUG -fexpensive-optimizations  -ftree-vectorize -funroll-loops -fvariable-expansion-in-unroller -funsafe-loop-optimizations -ftree-loop-im -funswitch-loops -ftree-loop-ivcanon -ftracer -fprefetch-loop-arrays -freorder-blocks-and-partition -funsafe-math-optimizations -ffinite-math-only -fdata-sections -openmp-simd  -g
+# -fno-exceptions 
+#-combine
 # OPTIMIZATIONS ?= -mtune=cortex-a53 -funsafe-math-optimizations -ffast-math -fomit-frame-pointer -O3 -fno-finite-math-only -fvisibility=hidden -fdata-sections -ffunction-sections  -DNDEBUG # -fopt-info-vec-optimize
 # OPTIMIZATIONS = -msse
 PREFIX ?= /usr
 
-DEBUGFLAGS = -D_FORTIFY_SOURCE=2 -O0 -g -Wl,-z,relro,-z,now -fPIC -DPIC -Wall -D DEBUG -D NOSSE
-CFLAGS ?= -fPIC $(OPTIMIZATIONS) #$(DEBUGFLAGS)
+# DEBUGFLAGS = -D_FORTIFY_SOURCE=2 -O0 -g -Wl,-z,relro,-z,now -fPIC -DPIC -Wall -D DEBUG -D NOSSE
+# DEBUGFLAGS = -D DEBUG -D_FORTIFY_SOURCE=2 -O3 -g -Wl,-z,relro,-z,now -fPIC -DPIC -Wall -D DEBUG #-D NOSSE
+CFLAGS ?= -fPIC $(OPTIMIZATIONS) # $(DEBUGFLAGS)
+# CFLAGS ?= -fPIC $(DEBUGFLAGS)
 
 PKG_CONFIG?=pkg-config
 STRIP?=strip
