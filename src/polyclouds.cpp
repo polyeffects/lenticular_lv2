@@ -62,6 +62,7 @@ typedef enum {
     REVERB_PARAM = 25,
     FREEZE_PARAM = 26,
 	REVERSE_PARAM = 27,
+	BYPASS_PARAM = 28,
 } PortIndex;
 
 /**
@@ -102,6 +103,7 @@ typedef struct {
     const float* reverb_param;
     const float* freeze_param;
     const float* reverse_param;
+    const float* bypass_param;
 	/* bool is_on; */
 	/* bool was_down; */
 	int buffersize = 1;
@@ -121,8 +123,10 @@ typedef struct {
     float spread_smooth = 0.5f;
     float feedback_smooth = 0.5f;
     float reverb_smooth = 0.5f;
+    float bypass_smooth = 0.5f;
 
 	bool prev_trigger = false;
+	bool prev_bypass = false;
 
 } Clouds;
 
@@ -253,6 +257,9 @@ connect_port(LV2_Handle instance,
 		case REVERSE_PARAM:
 			amp->reverse_param = (const float*)data;
 			break;
+		case BYPASS_PARAM: // kill dry
+			amp->bypass_param = (const float*)data;
+			break;
 
 		default:
 			break;
@@ -315,6 +322,7 @@ run(LV2_Handle instance, uint32_t n_samples)
     const float reverb_param = *(amp->reverb_param);
     const float freeze_param = *(amp->freeze_param);
     const float reverse_param = *(amp->reverse_param);
+    const float bypass_param = *(amp->bypass_param);
 	//
 	clouds::GranularProcessor *processor = amp->processor;
 
@@ -328,7 +336,18 @@ run(LV2_Handle instance, uint32_t n_samples)
     float spread_smooth = amp->spread_smooth;
     float feedback_smooth = amp->feedback_smooth;
     float reverb_smooth = amp->reverb_smooth;
+    float bypass_smooth = amp->bypass_smooth;
 
+
+    // TODO add faded transitions to bypass
+    if (bypass_param > 0.4) {
+        // set the output buffers to zero
+		for (uint32_t i = 0; i < n_samples; i++) {
+            out_l[i] = 0.0f;
+            out_r[i] = 0.0f;
+        }
+        return;
+    }
 
 	// Trigger Do i need to persist? 
 	// Schmitt trigger here? 

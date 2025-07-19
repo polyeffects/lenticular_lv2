@@ -42,7 +42,9 @@ typedef enum {
         // outputs
 		ODD_OUTPUT,
 		EVEN_OUTPUT,
+        // random params added later
 		INTERNAL_EXCITER_PARAM,
+		BYPASS_PARAM,
 } PortIndex;
 
 struct Rings {
@@ -83,6 +85,7 @@ struct Rings {
     float* odd_output;
     float* even_output;
     const float* internal_exciter_param;
+    const float* bypass_param;
 
 	Rings(double rate) {
 		/* config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS); */
@@ -197,6 +200,9 @@ connect_port(LV2_Handle instance,
         case INTERNAL_EXCITER_PARAM:
             amp->internal_exciter_param = (const float*)data;
             break;
+        case BYPASS_PARAM:
+            amp->bypass_param = (const float*)data;
+            break;
 		default:
 			break;
 	}
@@ -237,6 +243,17 @@ run(LV2_Handle instance, uint32_t n_samples)
     float* odd_output = amp->odd_output;
     float* even_output = amp->even_output;
     const float internal_exciter_param = *(amp->internal_exciter_param);
+    const float bypass_param = *(amp->bypass_param);
+
+    // TODO add faded transitions to bypass
+    if (bypass_param > 0.4) {
+        // set the output buffers to zero
+		for (uint32_t i = 0; i < n_samples; i++) {
+            odd_output[i] = 0.0f;
+            even_output[i] = 0.0f;
+        }
+        return;
+    }
 
 	int polyphonyMode = 0;
 	rings::ResonatorModel resonatorModel = rings::RESONATOR_MODEL_MODAL;
@@ -254,6 +271,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		block_size = n_samples;	
 	}
 	uint32_t pos = 0;
+
 
 	bool strum = amp->strum;
 	bool lastStrum = amp->lastStrum;

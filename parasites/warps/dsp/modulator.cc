@@ -842,7 +842,7 @@ void Modulator::ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t siz
     ONE_POLE(doppler_angle_, an, 0.001f);
 
     // compute binaural delay
-    float binaural_delay = doppler_angle_ * (48000.0f * 0.0015f); // -1.5ms..1.5ms
+    float binaural_delay = doppler_angle_ * (96000.0f * 0.0015f); // -1.5ms..1.5ms
     float delay_l = doppler_distance_ * room_size + (doppler_angle_ > 0 ? binaural_delay : 0);
     float delay_r = doppler_distance_ * room_size + (doppler_angle_ < 0 ? -binaural_delay : 0);
 
@@ -880,7 +880,7 @@ void Modulator::ProcessDoppler(ShortFrame* input, ShortFrame* output, size_t siz
 
     x += x_increment;
     y += y_increment;
-    doppler_lfo_phase_ += lfo_freq / 48000.0f;
+    doppler_lfo_phase_ += lfo_freq / 96000.0f;
     if (doppler_lfo_phase_ > 1.0f) doppler_lfo_phase_--;
     input++;
     output++;
@@ -936,6 +936,7 @@ void Modulator::Process(ShortFrame* input, ShortFrame* output, size_t size) {
     ProcessMeta(input, output, size);
     break;
   }
+
 }
 
 /* static */

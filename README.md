@@ -1,6 +1,7 @@
-polyfoot.lv2
+polylenticular.lv2
 ==============
 
+LV2 ports of the mutable instruments modules.
 
 Install
 -------

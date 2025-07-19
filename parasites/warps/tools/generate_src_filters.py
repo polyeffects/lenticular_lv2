@@ -180,7 +180,7 @@ if __name__ == '__main__':
       '-c',
       '--configurations',
       dest='configurations',
-      default='6,48,0.06;4,48,0.105;3,36,0.05',
+      default='6,48,0.06;4,48,0.105;3,36,0.05;2,48,0.105',
       help='Output file name')
   parser.add_option(
       '-o',

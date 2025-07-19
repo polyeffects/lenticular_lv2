@@ -21,10 +21,14 @@
 #include <stdbool.h>
 #include <string.h>
 #include "warps/dsp/modulator.h"
+#include "warps/dsp/sample_rate_converter.h"
 
 #define clamp(x, lower, upper) (fmax(lower, fmin(x, upper)))
 
 #define WARPS_URI "http://polyeffects.com/lv2/polywarps#"
+
+#define WARPS_BLOCK_SIZE 32
+
 
 /**
    In code, ports are referred to by index.  An enumeration of port indices
@@ -69,11 +73,18 @@ typedef struct {
     float* aux_output;
 
 	warps::Modulator *modulator;
+    warps::SampleRateConverter<warps::SRC_UP, 2, 48> src_up_[2];
+    warps::SampleRateConverter<warps::SRC_DOWN, 2, 48> src_down_[2];
 
 	float algorithm_smooth = 0.5f;
     float timbre_smooth = 0.5f;
     float level1_smooth = 0.5f;
     float level2_smooth = 0.5f;
+
+    float input_down[2][WARPS_BLOCK_SIZE];
+    float input_up[2][WARPS_BLOCK_SIZE*2];
+    float output_up[2][WARPS_BLOCK_SIZE*2];
+    float output_down[2][WARPS_BLOCK_SIZE];
 
 } Warps;
 
@@ -86,7 +97,12 @@ instantiate(const LV2_Descriptor*     descriptor,
 	Warps* amp = new Warps();
     amp->modulator = new warps::Modulator();
 	memset(amp->modulator, 0, sizeof(*amp->modulator));
-    amp->modulator->Init(48000.0f);
+    amp->modulator->Init(96000.0f);
+
+    for (int32_t i = 0; i < 2; ++i) {
+        amp->src_up_[i].Init();
+        amp->src_down_[i].Init();
+    }
 
 	// set feature mode for the difference modules.
 	if (!strcmp (descriptor->URI, WARPS_URI "doppler")) {
@@ -203,20 +219,30 @@ run(LV2_Handle instance, uint32_t n_samples)
     float* modulator_output = amp->modulator_output;
     float* aux_output = amp->aux_output;
 
+    float* input_up_c = amp->input_up[0];
+    float* input_up_m = amp->input_up[1];
+
 	warps::Modulator *modulator = amp->modulator;
 
-	uint32_t block_size = 32;
+	uint32_t block_size = WARPS_BLOCK_SIZE;
 	if (n_samples < block_size){
 		block_size = n_samples;	
 	}
 
 	uint32_t pos = 0;
 	while (pos < n_samples){
-		warps::ShortFrame input[block_size];
-		for (uint32_t i = 0; i < block_size; i++) {
-			input[i].l = clamp(carrier_input[pos+i] * 32767.0f, -32768.0f, 32767.0f);
-			input[i].r = clamp(modulator_input[pos+i] * 32767.0f, -32768.0f, 32767.0f);
+
+        amp->src_up_[0].Process(carrier_input+(pos), input_up_c, block_size);
+        amp->src_up_[1].Process(modulator_input+(pos), input_up_m, block_size);
+
+
+		warps::ShortFrame input[block_size*2];
+		for (uint32_t i = 0; i < (block_size*2); i++) {
+			input[i].l = clamp(input_up_c[i] * 32767.0f, -32768.0f, 32767.0f);
+			input[i].r = clamp(input_up_m[i] * 32767.0f, -32768.0f, 32767.0f);
 		}
+
+        // convert from 48 kHz input to 96 kHz.
 		uint32_t j = pos;
 
         warps::Parameters *p = modulator->mutable_parameters();
@@ -242,13 +268,25 @@ run(LV2_Handle instance, uint32_t n_samples)
 
         p->note = 60.0 * amp->level1_smooth + 12.0 * level1_input[j]+ 12.0;
 
-		warps::ShortFrame output[block_size];
-        modulator->Process(input, output, block_size);
+		warps::ShortFrame output[block_size*2];
+        modulator->Process(input, output, block_size*2);
 
-		for (uint32_t i = 0; i < block_size; i++) {
-			modulator_output[pos+i] = output[i].l / 32768.0;
-			aux_output[pos+i] = output[i].r / 32768.0;
+        // convert back to 48 kHz from 96 kHz.
+		for (uint32_t i = 0; i < (block_size*2); i++) {
+			amp->output_up[0][i] = output[i].l / 32768.0;
+			amp->output_up[1][i] = output[i].r / 32768.0;
 		}
+
+        amp->src_down_[0].Process(amp->output_up[0], modulator_output+pos, block_size*2);
+        amp->src_down_[1].Process(amp->output_up[1], aux_output+pos, block_size*2);
+
+        /* amp->src_down_[0].Process(input_up_m, modulator_output+pos, block_size*2); */
+        /* amp->src_down_[1].Process(input_up_c, aux_output+pos, block_size*2); */
+
+		/* for (uint32_t i = 0; i < block_size+1; i=i+2) { */
+		/* 	modulator_output[pos+i] = output[i].l / 32768.0; */
+		/* 	aux_output[pos+i] = output[i].r / 32768.0; */
+		/* } */
 
 		pos = pos + block_size;
 		if (pos+block_size > n_samples){
