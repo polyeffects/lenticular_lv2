@@ -48,6 +48,7 @@ typedef enum {
     MODULATOR_INPUT = 10,
     MODULATOR_OUTPUT = 11,
     AUX_OUTPUT = 12,
+	BYPASS_PARAM = 13,
 } PortIndex;
 
 /**
@@ -71,6 +72,7 @@ typedef struct {
     const float* modulator_input;
     float* modulator_output;
     float* aux_output;
+    const float* bypass_param;
 
 	warps::Modulator *modulator;
     warps::SampleRateConverter<warps::SRC_UP, 2, 48> src_up_[2];
@@ -175,6 +177,9 @@ connect_port(LV2_Handle instance,
         case AUX_OUTPUT:
             amp->aux_output = (float*)data;
             break;
+		case BYPASS_PARAM: // kill dry
+			amp->bypass_param = (const float*)data;
+			break;
 		default:
 			break;
 	}
@@ -222,7 +227,19 @@ run(LV2_Handle instance, uint32_t n_samples)
     float* input_up_c = amp->input_up[0];
     float* input_up_m = amp->input_up[1];
 
+    const float bypass_param = *(amp->bypass_param);
+
 	warps::Modulator *modulator = amp->modulator;
+
+    // TODO add faded transitions to bypass
+    if (bypass_param < 0.4) {
+        // set the output buffers to zero
+		for (uint32_t i = 0; i < n_samples; i++) {
+            modulator_output[i] = 0.0f;
+            aux_output[i] = 0.0f;
+        }
+        return;
+    }
 
 	uint32_t block_size = WARPS_BLOCK_SIZE;
 	if (n_samples < block_size){

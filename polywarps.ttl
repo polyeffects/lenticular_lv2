@@ -120,6 +120,15 @@ warps:doppler
 		lv2:index 12 ;
 		lv2:symbol "aux" ;
 		lv2:name "aux" ;# AUX_OUTPUT
+	] , [
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 13 ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
 	] .
 
 warps:fold
@@ -233,6 +242,15 @@ warps:fold
 		lv2:index 12 ;
 		lv2:symbol "aux" ;
 		lv2:name "aux" ;# AUX_OUTPUT
+	] , [
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 13 ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
 	] .
 
 warps:chebyschev
@@ -346,6 +364,15 @@ warps:chebyschev
 		lv2:index 12 ;
 		lv2:symbol "aux" ;
 		lv2:name "aux" ;# AUX_OUTPUT
+	] , [
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 13 ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
 	] .
 
 warps:frequency_shifter
@@ -459,6 +486,15 @@ warps:frequency_shifter
 		lv2:index 12 ;
 		lv2:symbol "aux" ;
 		lv2:name "aux" ;# AUX_OUTPUT
+	] , [
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 13 ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
 	] .
 
 warps:bitcrusher
@@ -572,6 +608,15 @@ warps:bitcrusher
 		lv2:index 12 ;
 		lv2:symbol "aux" ;
 		lv2:name "aux" ;# AUX_OUTPUT
+	] , [
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 13 ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
 	] .
 
 warps:comparator
@@ -685,6 +730,15 @@ warps:comparator
 		lv2:index 12 ;
 		lv2:symbol "aux" ;
 		lv2:name "aux" ;# AUX_OUTPUT
+	] , [
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 13 ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
 	] .
 
 warps:vocoder
@@ -798,6 +852,15 @@ warps:vocoder
 		lv2:index 12 ;
 		lv2:symbol "aux" ;
 		lv2:name "aux" ;# AUX_OUTPUT
+	] , [
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 13 ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
 	] .
 
 warps:delay
@@ -911,6 +974,15 @@ warps:delay
 		lv2:index 12 ;
 		lv2:symbol "aux" ;
 		lv2:name "aux" ;# AUX_OUTPUT
+	] , [
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 13 ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
 	] .
 
 warps:meta
@@ -1024,4 +1096,13 @@ warps:meta
 		lv2:index 12 ;
 		lv2:symbol "aux" ;
 		lv2:name "aux" ;# AUX_OUTPUT
+	] , [
+		a lv2:InputPort ,
+			lv2:ControlPort ;
+		lv2:index 13 ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 1.0 ;
 	] .

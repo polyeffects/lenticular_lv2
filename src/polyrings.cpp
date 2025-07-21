@@ -246,7 +246,7 @@ run(LV2_Handle instance, uint32_t n_samples)
     const float bypass_param = *(amp->bypass_param);
 
     // TODO add faded transitions to bypass
-    if (bypass_param > 0.4) {
+    if (bypass_param < 0.4) {
         // set the output buffers to zero
 		for (uint32_t i = 0; i < n_samples; i++) {
             odd_output[i] = 0.0f;

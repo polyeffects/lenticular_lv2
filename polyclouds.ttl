@@ -259,8 +259,8 @@ clouds:granular
 		a lv2:InputPort ,
 			lv2:ControlPort ;
 		lv2:index 28 ;
-		lv2:symbol "bypass_param" ;
-		lv2:name "bypass" ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
@@ -516,8 +516,8 @@ clouds:stretch
 		a lv2:InputPort ,
 			lv2:ControlPort ;
 		lv2:index 28 ;
-		lv2:symbol "bypass_param" ;
-		lv2:name "bypass" ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
@@ -772,8 +772,8 @@ clouds:looping_delay
 		a lv2:InputPort ,
 			lv2:ControlPort ;
 		lv2:index 28 ;
-		lv2:symbol "bypass_param" ;
-		lv2:name "bypass" ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
@@ -1028,8 +1028,8 @@ clouds:spectral
 		a lv2:InputPort ,
 			lv2:ControlPort ;
 		lv2:index 28 ;
-		lv2:symbol "bypass_param" ;
-		lv2:name "bypass" ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
@@ -1284,8 +1284,8 @@ clouds:oliverb
 		a lv2:InputPort ,
 			lv2:ControlPort ;
 		lv2:index 28 ;
-		lv2:symbol "bypass_param" ;
-		lv2:name "bypass" ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
@@ -1541,8 +1541,8 @@ clouds:resonestor
 		a lv2:InputPort ,
 			lv2:ControlPort ;
 		lv2:index 28 ;
-		lv2:symbol "bypass_param" ;
-		lv2:name "bypass" ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
@@ -1798,8 +1798,8 @@ clouds:beat_repeat
 		a lv2:InputPort ,
 			lv2:ControlPort ;
 		lv2:index 28 ;
-		lv2:symbol "bypass_param" ;
-		lv2:name "bypass" ;
+		lv2:symbol "enabled" ;
+		lv2:name "enabled" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 1.0 ;
